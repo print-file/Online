@@ -209,7 +209,6 @@
     .confirm-box .price { font-size: 40px; font-weight: 700; color: var(--primary); margin: 25px 0; letter-spacing: -1px;}
     .confirm-btn-group { display: flex; gap: 15px; margin-top: 25px; }
 
-    /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -349,8 +348,7 @@
   <div class="toast" id="toast">Message</div>
 
   <script>
-    // Configured with your active deployment URL
-    const API_URL = 'https://script.google.com/macros/s/AKfycbw5Hc4IAYLrXy9_enCwnvXCbYCOPme1cwfBHZVQqTy4xOCJQ_2u4RkLY84WnY7IH_SU/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbynJZqoaesqXOeZ-na4pnHUo-eSNIVs0WCWa5ExxpZHnMsTqN6VSB2CnVQpzNctzcXV/exec';
 
     const CONFIG = {
       pricing: {
@@ -487,7 +485,6 @@
       fileReader.readAsArrayBuffer(file);
     }
 
-    // Standard CORS-friendly HTTP Fetch to Google Apps Script
     async function apiRequest(payload) {
       try {
         const response = await fetch(API_URL, {
