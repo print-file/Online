@@ -216,7 +216,7 @@
       <div class="form-group" style="display:flex; gap:15px; align-items: flex-end;">
         <div style="flex: 1; margin-bottom: 0;">
             <label>Your Roll Number</label>
-            <input type="text" id="dueRoll" pattern="\d{7}" maxlength="7" placeholder="2202XXX">
+            <input type="text" id="dueRoll" pattern="\d{7}" maxlength="7" placeholder="2202XXX" onkeypress="if(event.key==='Enter') checkDue()">
         </div>
         <button id="checkBtn" onclick="checkDue()" class="btn-success" style="margin:0; width:auto; padding: 14px 30px;">
           <svg class="spinner-small" id="checkSpinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><polyline points="21 3 21 8 16 8"></polyline></svg>
@@ -243,7 +243,7 @@
   <div class="toast" id="toast">Message</div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwQgfcqz3sjcMglArOjcYUZdjJ8LPf5w4pQFmQfz-EDmD3z5kdXGYBrE20JfywqccPQ/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycby62B_ehwFbzrmm1Szw9UkFSxgVDH_HJ274gV3y66p5CCYY-dE0JgJwEI_KI_JMcZzQ/exec';
 
     const CONFIG = {
       pricing: {
@@ -266,12 +266,10 @@
           btn.innerText = 'Service Disabled';
           document.getElementById('offlineNotice').style.display = 'block';
         } else {
-          // System is ON, activate the button
           btn.disabled = false;
           btn.innerText = 'Start Printing';
         }
       } catch(e) {
-        // Fallback in case of network issue - enable button so system isn't soft-locked
         btn.disabled = false;
         btn.innerText = 'Start Printing';
       }
