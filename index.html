@@ -152,19 +152,19 @@
       
       <div class="form-group">
         <label>Document File</label>
-        <input type="file" id="pdfInput" accept="application/pdf">
+        <!-- Automatically triggers analysis when file is changed if mode is selected -->
+        <input type="file" id="pdfInput" accept="application/pdf" onchange="handleFileChange()">
       </div>
       
       <div class="form-group">
         <label>Select Print Mode</label>
-        <select id="modeInput">
+        <!-- Automatically triggers analysis and pricing upon selection -->
+        <select id="modeInput" onchange="handleModeChange()">
           <option value="" disabled selected>Not Selected</option>
           <option value="color">Color</option>
           <option value="bw">Black & White</option>
         </select>
       </div>
-      
-      <button id="processBtn" onclick="processPDF()" style="margin-top:10px;">Process & Estimate</button>
       
       <div id="processingArea" style="display:none; margin-top: 25px; text-align: center;">
         <div class="spinner" style="width: 30px; height: 30px; border-width: 3px; margin-bottom: 15px;"></div>
@@ -256,8 +256,8 @@
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
     let currentJob = null; 
+    let cachedPagesAnalysis = null; 
 
-    // Fetch system status on load to enable/disable the button safely
     window.addEventListener('DOMContentLoaded', async () => {
       const btn = document.getElementById('startPrintBtn');
       try {
@@ -296,11 +296,11 @@
     }
 
     function resetForms() {
+      document.getElementById('rollInput').value = '';
       document.getElementById('pdfInput').value = '';
       document.getElementById('modeInput').value = '';
       document.getElementById('processingArea').style.display = 'none';
       document.getElementById('previewArea').style.display = 'none';
-      document.getElementById('processBtn').disabled = false;
       document.getElementById('submitBtn').disabled = false;
       
       document.getElementById('confirmBoxOptions').style.display = 'block';
@@ -309,21 +309,78 @@
       document.getElementById('dueResults').style.display = 'none';
       
       currentJob = null;
+      cachedPagesAnalysis = null;
+    }
+
+    // Triggered automatically when user selects a new file
+    function handleFileChange() {
+      cachedPagesAnalysis = null;
+      document.getElementById('previewArea').style.display = 'none';
+      currentJob = null;
+      const mode = document.getElementById('modeInput').value;
+      if (mode) {
+        processPDF();
+      }
+    }
+
+    // Triggered automatically when mode changes
+    function handleModeChange() {
+      const mode = document.getElementById('modeInput').value;
+      if (!mode) return;
+
+      if (cachedPagesAnalysis && cachedPagesAnalysis.length > 0) {
+        recalculateEstimate(mode);
+      } else {
+        const fileInput = document.getElementById('pdfInput');
+        if (fileInput.files && fileInput.files[0]) {
+          processPDF();
+        } else {
+          showToast('Please select a PDF file first', true);
+        }
+      }
+    }
+
+    function recalculateEstimate(mode) {
+      let totalCost = 0;
+      const pageDetails = [];
+      const grid = document.getElementById('thumbnailGrid');
+      grid.innerHTML = '';
+
+      cachedPagesAnalysis.forEach(p => {
+        const cost = CONFIG.pricing[mode][p.intensity];
+        totalCost += cost;
+        pageDetails.push({ page: p.page, intensity: p.intensity, cost: cost });
+
+        const thumbDiv = document.createElement('div');
+        thumbDiv.className = 'page-thumb';
+        thumbDiv.innerHTML = `<img src="${p.imgData}"><br><strong>P${p.page}</strong><br><span style="color:#64748b">${p.intensity}</span><br><strong style="color:var(--primary)">${cost} Tk</strong>`;
+        grid.appendChild(thumbDiv);
+      });
+
+      const roundedTotal = Math.round(totalCost);
+      document.getElementById('summaryModeDisplay').innerText = mode === 'bw' ? 'Black & White' : 'Color';
+      document.getElementById('summaryCost').innerText = roundedTotal;
+
+      if (currentJob) {
+        currentJob.mode = mode;
+        currentJob.pageDetails = pageDetails;
+        currentJob.totalAmount = roundedTotal;
+      }
     }
 
     async function processPDF() {
-      const roll = document.getElementById('rollInput').value;
       const fileInput = document.getElementById('pdfInput');
       const mode = document.getElementById('modeInput').value;
 
-      if (!/^\d{7}$/.test(roll)) return showToast('Please enter a 7-digit roll number', true);
-      if (!fileInput.files[0] || fileInput.files[0].type !== 'application/pdf') return showToast('Please select a valid PDF file', true);
-      if (!mode) return showToast('Please select a Print Mode', true);
+      if (!fileInput.files[0] || fileInput.files[0].type !== 'application/pdf') {
+        return showToast('Please select a valid PDF file', true);
+      }
+      if (!mode) return;
       
       const file = fileInput.files[0];
       if (file.size > 100 * 1024 * 1024) return showToast('File is too large (Max 100MB)', true);
 
-      document.getElementById('processBtn').disabled = true;
+      document.getElementById('previewArea').style.display = 'none';
       document.getElementById('processingArea').style.display = 'block';
       
       const fileReader = new FileReader();
@@ -333,9 +390,7 @@
           const pdf = await pdfjsLib.getDocument(typedarray).promise;
           const numPages = pdf.numPages;
           
-          let totalCost = 0;
-          const pageDetails = [];
-          document.getElementById('thumbnailGrid').innerHTML = '';
+          cachedPagesAnalysis = [];
 
           for (let i = 1; i <= numPages; i++) {
             document.getElementById('processStatus').innerText = `Analyzing page ${i} of ${numPages}...`;
@@ -358,36 +413,37 @@
             if (coverage > CONFIG.thresholds.high) intensity = 'High';
             else if (coverage > CONFIG.thresholds.medium) intensity = 'Medium';
             
-            const cost = CONFIG.pricing[mode][intensity];
-            totalCost += cost;
-            pageDetails.push({ page: i, intensity, cost });
-            
-            const thumbDiv = document.createElement('div');
-            thumbDiv.className = 'page-thumb';
-            thumbDiv.innerHTML = `<img src="${canvas.toDataURL('image/jpeg', 0.5)}"><br><strong>P${i}</strong><br><span style="color:#64748b">${intensity}</span><br><strong style="color:var(--primary)">${cost} Tk</strong>`;
-            document.getElementById('thumbnailGrid').appendChild(thumbDiv);
+            cachedPagesAnalysis.push({
+              page: i,
+              intensity: intensity,
+              imgData: canvas.toDataURL('image/jpeg', 0.5)
+            });
           }
 
-          const roundedTotal = Math.round(totalCost);
           document.getElementById('summaryPages').innerText = numPages;
-          document.getElementById('summaryModeDisplay').innerText = mode === 'bw' ? 'Black & White' : 'Color';
-          document.getElementById('summaryCost').innerText = roundedTotal;
+          recalculateEstimate(mode);
+
           document.getElementById('processingArea').style.display = 'none';
           document.getElementById('previewArea').style.display = 'block';
           
           const b64Reader = new FileReader();
           b64Reader.onload = (e) => {
             currentJob = {
-              subId: crypto.randomUUID(), roll: roll, fileName: file.name, mode: mode,
-              totalPages: numPages, pageDetails: pageDetails, totalAmount: roundedTotal,
+              subId: crypto.randomUUID(), 
+              roll: document.getElementById('rollInput').value, 
+              fileName: file.name, 
+              mode: mode,
+              totalPages: numPages, 
+              pageDetails: cachedPagesAnalysis.map(p => ({ page: p.page, intensity: p.intensity, cost: CONFIG.pricing[mode][p.intensity] })),
+              totalAmount: parseInt(document.getElementById('summaryCost').innerText) || 0,
               base64: e.target.result.split(',')[1]
             };
           };
           b64Reader.readAsDataURL(file);
 
         } catch (err) {
-          console.error(err); showToast('Error parsing PDF', true);
-          document.getElementById('processBtn').disabled = false;
+          console.error(err); 
+          showToast('Error parsing PDF', true);
           document.getElementById('processingArea').style.display = 'none';
         }
       };
@@ -408,6 +464,10 @@
 
     function submitOrder() {
       if(!currentJob) return;
+      const roll = document.getElementById('rollInput').value;
+      if (!/^\d{7}$/.test(roll)) return showToast('Please enter a 7-digit roll number', true);
+      currentJob.roll = roll;
+
       document.getElementById('submitBtn').disabled = true;
       document.getElementById('confirmTotal').innerText = currentJob.totalAmount;
       openModal('confirmModal');
@@ -427,7 +487,7 @@
           await apiRequest({ action: 'uploadChunk', subId: currentJob.subId, chunkIndex: i, chunkBase64: chunk });
           const percent = Math.round(((i + 1) / totalChunks) * 85); 
           fill.style.width = percent + '%';
-          textElement.innerText = "Uploading...";
+          textElement.innerText = `Uploading...: ${percent}%`;
         }
         textElement.innerText = "Uploading...";
         const { base64, ...jobMeta } = currentJob;
