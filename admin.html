@@ -1,981 +1,491 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Admin</title>
-
+  <title>Admin - Unified Control Portal</title>
   
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
-
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-
-
   <style>
-
     :root { 
-
       --primary: #2563eb; 
-
       --primary-hover: #1d4ed8;
-
       --bg: #f8fafc; 
-
       --text: #1e293b; 
-
       --danger: #dc2626; 
-
       --success: #059669; 
-
       --gray: #4b5563; 
-
     }
-
     
-
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', system-ui, sans-serif; }
-
     body { background-color: var(--bg); color: var(--text); padding: 20px; }
-
     .container { max-width: 1100px; margin: 0 auto; }
-
     
-
     /* Header & Navigation Bar */
-
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
-
     .header h2 { font-size: 1.6rem; color: #0f172a; }
-
     .nav-buttons { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-
     
-
     /* Service Toggle UI */
-
     .service-control { display: flex; align-items: center; background: #fee2e2; padding: 7px 12px; border-radius: 6px; gap: 8px; border: 1px solid #f87171; transition: all 0.3s; }
-
     .service-control.active { background: #d1fae5; border-color: #34d399; }
-
     .service-control label { font-size: 13px; font-weight: 600; color: #334155; cursor: pointer; }
-
     .service-control input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
 
-
-
     /* Standardized Buttons */
-
     .btn { color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
-
     .btn:hover { opacity: 0.9; }
-
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
     
-
     .btn-primary { background: var(--primary); }
-
     .btn-view { background: var(--gray); }
-
     .btn-open { background: var(--success); }
-
     .btn-delete { background: var(--danger); }
-
     .btn-switch { background: #0f172a; padding: 9px 16px; font-size: 14px; }
-
     .btn-refresh { background: var(--primary); padding: 9px 16px; font-size: 14px; }
-
     
-
     /* Section Visibility */
-
     .view-section { display: none; }
-
     .view-section.active { display: block; animation: fadeIn 0.3s ease; }
-
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-
-
     /* Tables */
-
     table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.04); margin-top: 10px; }
-
     th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 14px; }
-
     th { background: #f1f5f9; font-weight: 600; color: #475569; }
-
     
-
     /* Badges */
-
     .badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; background: #e2e8f0; color: #475569; display: inline-block; }
-
     .badge.success { background: #d1fae5; color: #065f46; }
-
     .badge.danger { background: #fee2e2; color: #991b1b; }
-
     
-
     /* MODIFIED: Floating Sticky Close Button */
-
     .close-btn { 
-
       position: sticky; 
-
       top: 10px; 
-
       float: right; 
-
       margin-right: -10px; 
-
       margin-top: -10px; 
-
       margin-bottom: -20px; 
-
       background: #ffffff; 
-
       color: #64748b; 
-
       width: 36px; 
-
       height: 36px; 
-
       border-radius: 50%; 
-
       font-size: 24px; 
-
       border: 1px solid #e2e8f0; 
-
       cursor: pointer; 
-
       display: flex; 
-
       align-items: center; 
-
       justify-content: center; 
-
       line-height: 1; 
-
       transition: all 0.2s ease;
-
       z-index: 100;
-
       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-
     }
-
     .close-btn:hover { background: #fee2e2; color: var(--danger); border-color: #f87171;}
 
-
-
     /* Modals */
-
     .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); padding: 20px; align-items: center; justify-content: center; z-index: 50; }
-
     .modal.active { display: flex; }
-
     .modal-content { background: white; width: 100%; max-width: 800px; padding: 30px; border-radius: 16px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15); }
-
     
-
     /* Search & Payment Boxes */
-
     .payment-box { background: #f8fafc; padding: 20px; border-radius: 12px; margin-top: 20px; text-align: left; border: 1px solid #e2e8f0; }
-
     .status-check { transform: scale(1.3); cursor: pointer; margin-right: 8px; }
-
     .load-more { display: block; width: 100%; text-align: center; background: #e2e8f0; color: #334155; padding: 12px; margin-top: 15px; border-radius: 8px; cursor: pointer; font-weight: 600; border: none; }
-
     
-
     /* Login Screen Overlay */
-
     #loginOverlay { position: fixed; inset: 0; background: #ffffff; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-
     #loginOverlay input { width: 100%; max-width: 320px; padding: 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; margin: 15px 0; outline: none; text-align: center; font-weight: 600; letter-spacing: 2px;}
-
     #loginOverlay input:focus { border-color: var(--primary); }
 
-
-
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
     .spinner-svg { width: 16px; height: 16px; margin-right: 6px; animation: spin 1s linear infinite; display: none; }
-
   </style>
-
 </head>
-
 <body>
 
-
-
   <!-- Fullscreen Secure Admin Gate -->
-
   <div id="loginOverlay">
-
-    <h2 style="color:#0f172a; margin-bottom: 5px;">Admin</h2>
-
-    <p style="color:#64748b; font-size:14px;">Enter Password</p>
-
+    <h2 style="color:#0f172a; margin-bottom: 5px;">Admin Security Gate</h2>
+    <p style="color:#64748b; font-size:14px;">Enter Master PIN to continue</p>
     <input type="password" id="pinInput" placeholder="****" maxlength="4">
-
-    <button class="btn btn-primary" onclick="login()" style="width:100%; max-width: 320px; padding: 14px; font-size: 15px;">Enter</button>
-
-    <p id="loginErr" style="color:red; display:none; margin-top:12px; font-size:14px; font-weight:600;">Access Denied: Incorrect Password</p>
-
+    <button class="btn btn-primary" onclick="login()" style="width:100%; max-width: 320px; padding: 14px; font-size: 15px;">Unlock Portal</button>
+    <p id="loginErr" style="color:red; display:none; margin-top:12px; font-size:14px; font-weight:600;">Access Denied: Incorrect PIN</p>
   </div>
-
-
 
   <div class="container">
-
     <!-- Top Action Header -->
-
     <div class="header">
-
       <div>
-
         <h2 id="portalHeading">Print Queue</h2>
-
         <span id="lastSync" style="font-size:12px; color:#64748b;">Ready</span>
-
       </div>
-
       
-
       <div class="nav-buttons">
-
         <!-- ON/OFF System Switch -->
-
         <div class="service-control" id="serviceBox">
-
           <label for="systemStatusCheck" id="statusLabel">Service OFF</label>
-
           <input type="checkbox" id="systemStatusCheck" onchange="toggleSystemStatus(this.checked)">
-
         </div>
 
-
-
         <button class="btn btn-refresh" id="refreshBtn" onclick="triggerRefresh()">
-
           <svg class="spinner-svg" id="refreshSpinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-
             <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><polyline points="21 3 21 8 16 8"></polyline>
-
           </svg>
-
           <span id="refreshText">Refresh</span>
-
         </button>
 
-
-
-        <button class="btn btn-switch" id="switchSectionBtn" onclick="togglePortalView()">Payment Portal</button>
-
+        <button class="btn btn-switch" id="switchSectionBtn" onclick="togglePortalView()">Go to Payment Ledger</button>
       </div>
-
     </div>
-
-
 
     <!-- SECTION 1: PRINT QUEUE -->
-
     <div id="printQueueSection" class="view-section active">
-
       <table>
-
         <thead>
-
           <tr>
-
             <th>Time</th>
-
             <th>Roll</th>
-
             <th>Mode</th>
-
             <th>Total (Tk)</th>
-
             <th>Status</th>
-
             <th>Actions</th>
-
           </tr>
-
         </thead>
-
         <tbody id="jobList">
-
-          <tr><td colspan="6" style="text-align:center; padding: 25px;">Loading...</td></tr>
-
+          <tr><td colspan="6" style="text-align:center; padding: 25px;">Loading queue...</td></tr>
         </tbody>
-
       </table>
-
       <button id="loadMoreBtn" class="load-more" style="display:none;" onclick="loadMore()">View More (10)</button>
-
     </div>
-
-
 
     <!-- SECTION 2: PAYMENT PORTAL -->
-
     <div id="paymentSection" class="view-section">
-
       <div style="display:flex; gap:10px; margin-bottom: 20px; max-width: 600px;">
-
         <input type="text" id="searchInput" placeholder="Search by 7-digit Roll" maxlength="7" style="flex:1; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px;">
-
         <button class="btn btn-primary" onclick="searchRoll()" style="padding: 0 22px;">Search</button>
-
       </div>
-
       
-
       <table>
-
         <thead>
-
           <tr>
-
             <th>Roll Number</th>
-
             <th>Due / Advance Balance</th>
-
             <th>Action</th>
-
           </tr>
-
         </thead>
-
         <tbody id="allDuesList">
-
-          <tr><td colspan="3" style="text-align:center; padding: 25px;">Loading...</td></tr>
-
+          <tr><td colspan="3" style="text-align:center; padding: 25px;">Loading ledger...</td></tr>
         </tbody>
-
       </table>
-
     </div>
-
   </div>
-
-
 
   <!-- MODAL 1: VIEW JOB & PDF -->
-
   <div class="modal" id="viewModal">
-
     <div class="modal-content">
-
       <button class="close-btn" onclick="closeModal('viewModal')">&times;</button>
-
       <h3 style="margin-bottom: 15px; margin-top: 10px;">Order Details & PDF</h3>
-
       <div id="orderDetails"></div>
-
     </div>
-
   </div>
-
-
 
   <!-- MODAL 2: DELETE CONFIRMATION -->
-
   <div class="modal" id="deleteModal" style="z-index: 70;">
-
     <div class="modal-content" style="max-width: 420px; text-align: center; padding: 40px 25px;">
-
       <button class="close-btn" onclick="closeModal('deleteModal')">&times;</button>
-
       <h3 style="color: var(--danger); margin-bottom: 12px; margin-top:10px;">Confirm Deletion</h3>
-
       <p style="color: #64748b; font-size: 14px;">Are you sure you want to permanently delete this job and remove its PDF from Drive?</p>
-
       <div style="display: flex; gap: 12px; margin-top: 25px; justify-content: center;">
-
         <button class="btn btn-view" onclick="closeModal('deleteModal')">Cancel</button>
-
         <button class="btn btn-delete" onclick="executeDelete()">Yes, Delete</button>
-
       </div>
-
     </div>
-
   </div>
-
-
 
   <!-- MODAL 3: STUDENT PAYMENT DETAILS -->
-
   <div class="modal" id="studentDetailModal">
-
     <div class="modal-content" style="max-width: 600px;">
-
       <button class="close-btn" onclick="closeModal('studentDetailModal')">&times;</button>
-
       <h3 style="margin-top: 5px;">Roll: <span id="modalRollTitle"></span></h3>
-
       
-
       <div id="checkDueValContainer" style="padding: 15px; border-radius: 8px; font-size: 20px; font-weight: bold; margin: 15px 0; text-align: center;">
-
         <span id="checkDueValText"></span>
-
       </div>
-
-
 
       <div class="payment-box">
-
         <h4 style="margin-bottom: 6px;">Receive Payment</h4>
-
         <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Amounts paid above the total due will be automatically saved as an Advance Balance.</p>
-
         <input type="number" id="payAmount" placeholder="Amount Received (Tk)" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:6px; font-size:15px; margin-bottom: 12px;">
-
         <button class="btn btn-open" onclick="handlePay()" id="payBtn" style="width:100%; padding: 12px; font-size: 14px;">Confirm Payment</button>
-
       </div>
-
       
-
       <h4 style="margin-top: 25px; color: #334155;">Payment History</h4>
-
       <div style="max-height: 150px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 8px;">
-
         <div id="historyList"></div>
-
       </div>
-
       
-
       <h4 style="margin-top: 25px; color: #334155;">Print History</h4>
-
       <div style="max-height: 150px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 8px;">
-
         <div id="recentPrintList"></div>
-
       </div>
-
     </div>
-
   </div>
-
-
 
   <!-- MODAL 4: SUCCESS MODAL -->
-
   <div class="modal" id="successModal" style="z-index: 80;">
-
     <div class="modal-content" style="max-width: 380px; text-align: center; padding: 40px 25px;">
-
       <button class="close-btn" onclick="closeModal('successModal')">&times;</button>
-
       <div style="color: var(--success); margin-bottom: 15px; margin-top: 10px;">
-
         <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-
       </div>
-
       <h3 style="color: #0f172a; margin-bottom: 10px;">Payment Completed</h3>
-
       <p id="successDetails" style="color: #475569; font-size: 14px; margin-bottom: 25px; line-height: 1.6;"></p>
-
       <button class="btn btn-primary" onclick="closeModal('successModal')" style="width:100%; padding: 12px;">Done</button>
-
     </div>
-
   </div>
 
-
-
   <script>
-
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwQgfcqz3sjcMglArOjcYUZdjJ8LPf5w4pQFmQfz-EDmD3z5kdXGYBrE20JfywqccPQ/exec';
-
-
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxerT1VWQPTlRhEYzI-iJPGhEDCwyx6ClzD9nANpFke-CxP63lDEylIXhTv7ILB56P7/exec';
 
     let ADMIN_PIN = '';
-
     let currentJobs = [];
-
     let displayCount = 10;
-
     let jobToDelete = null;
-
     let currentDueContext = 0;
-
     let currentRollContext = '';
-
     let activeView = 'queue';
 
-
-
     function closeModal(id) { 
-
       document.getElementById(id).classList.remove('active'); 
-
       if(id === 'deleteModal') jobToDelete = null;
-
     }
-
-
 
     function togglePortalView() {
-
       const queueSec = document.getElementById('printQueueSection');
-
       const paySec = document.getElementById('paymentSection');
-
       const heading = document.getElementById('portalHeading');
-
       const switchBtn = document.getElementById('switchSectionBtn');
 
-
-
       if (activeView === 'queue') {
-
         activeView = 'payment';
-
         queueSec.classList.remove('active'); paySec.classList.add('active');
-
         heading.innerText = 'Payment Management'; switchBtn.innerText = 'Go to Print Queue';
-
         loadAllDues();
-
       } else {
-
         activeView = 'queue';
-
         paySec.classList.remove('active'); queueSec.classList.add('active');
-
         heading.innerText = 'Print Queue'; switchBtn.innerText = 'Go to Payment Ledger';
-
         loadJobs();
-
       }
-
     }
-
-
 
     async function apiRequest(payload) {
-
       payload.adminPin = ADMIN_PIN; // Injects the PIN into every secure request
-
       try {
-
         const response = await fetch(API_URL, {
-
           method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-
         });
-
         const resJson = await response.json();
-
         if (resJson.success) return resJson.data;
-
         throw new Error(resJson.error || 'Server error occurred');
-
       } catch (err) {
-
         throw new Error(err.message || 'Server Connection Failed');
-
       }
-
     }
-
-
 
     async function login() {
-
       ADMIN_PIN = document.getElementById('pinInput').value || '7281';
-
       try {
-
         await loadJobs(); // Tests the PIN by requesting secure job data
-
         const statRes = await apiRequest({ action: 'getSystemStatus' });
-
         updateStatusUI(statRes.printStatus === 'ON');
-
         document.getElementById('loginOverlay').style.display = 'none';
-
         setInterval(() => { if (activeView === 'queue') loadJobsQuietly(); }, 30000);
-
       } catch (err) { 
-
         document.getElementById('loginErr').style.display = 'block'; 
-
       }
-
     }
-
-
 
     function updateStatusUI(isON) {
-
       const box = document.getElementById('serviceBox');
-
       const lbl = document.getElementById('statusLabel');
-
       document.getElementById('systemStatusCheck').checked = isON;
-
       if (isON) {
-
         box.classList.add('active'); lbl.innerText = 'Printing is ON';
-
       } else {
-
         box.classList.remove('active'); lbl.innerText = 'Printing is OFF';
-
       }
-
     }
-
-
 
     async function toggleSystemStatus(isON) {
-
       try {
-
         const stat = isON ? 'ON' : 'OFF';
-
         await apiRequest({ action: 'adminSetSystemStatus', printStatus: stat });
-
         updateStatusUI(isON);
-
       } catch (err) {
-
         alert("Failed to update status.");
-
         updateStatusUI(!isON); // Revert UI
-
       }
-
     }
-
-
 
     async function triggerRefresh() {
-
       const btn = document.getElementById('refreshBtn'); const spinner = document.getElementById('refreshSpinner'); const text = document.getElementById('refreshText');
-
       btn.disabled = true; spinner.style.display = 'block'; text.innerText = 'Refreshing...';
-
       if (activeView === 'queue') await loadJobs(); else await loadAllDues();
-
       spinner.style.display = 'none'; text.innerText = 'Refresh'; btn.disabled = false;
-
     }
-
-
 
     /* QUEUE LOGIC */
-
     async function loadJobs() {
-
       try {
-
         const jobs = await apiRequest({ action: 'adminGetJobs' });
-
         currentJobs = Array.isArray(jobs) ? jobs : []; renderTable();
-
         document.getElementById('lastSync').innerText = 'Last Sync: ' + new Date().toLocaleTimeString();
-
       } catch (err) { document.getElementById('jobList').innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; padding: 20px;"><strong>Error:</strong> ${err.message}</td></tr>`; }
-
     }
-
     async function loadJobsQuietly() {
-
       try {
-
         const jobs = await apiRequest({ action: 'adminGetJobs' });
-
         currentJobs = Array.isArray(jobs) ? jobs : []; renderTable();
-
         document.getElementById('lastSync').innerText = 'Last Sync: ' + new Date().toLocaleTimeString();
-
       } catch (err) {}
-
     }
-
     function loadMore() { displayCount += 10; renderTable(); }
-
     function renderTable() {
-
       const tbody = document.getElementById('jobList');
-
       if (!currentJobs || currentJobs.length === 0) {
-
          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 25px;">No jobs in the queue.</td></tr>`;
-
          document.getElementById('loadMoreBtn').style.display = 'none'; return;
-
       }
-
       const visibleJobs = currentJobs.slice(0, displayCount);
-
       tbody.innerHTML = visibleJobs.map((job) => {
-
         const isCompleted = String(job['Print Status']).trim() === '1';
-
         let modeDisplay = job.Mode ? job.Mode.toUpperCase() : "BW";
-
         return `
-
           <tr>
-
             <td>${String(job.Date || "").split('T')[0]} ${String(job.Time || "")}</td>
-
             <td><strong>${job.Roll || ''}</strong></td>
-
             <td>${modeDisplay} (${job['Total Pages'] || '1'}p)</td>
-
             <td>${job['Total Amount'] || '0'}</td>
-
             <td>
-
                <label style="display:flex; align-items:center; cursor:pointer;">
-
                  <input type="checkbox" class="status-check" onchange="toggleCompleted('${job['Submission ID']}', this.checked)" ${isCompleted ? 'checked' : ''}>
-
                  ${isCompleted ? '<span class="badge success">Completed</span>' : '<span class="badge">Pending</span>'}
-
                </label>
-
             </td>
-
             <td>
-
               <button class="btn btn-view" onclick="viewJob('${job['Submission ID']}')">View</button>
-
-              <button class="btn btn-open" style="margin-left:4px;" onclick="window.open('https://drive.google.com/file/d/${job['Drive File ID']}/view?usp=sharing', '_blank')">Print</button>
-
-              <button class="btn btn-delete" style="margin-left:4px;" onclick="openDeleteModal('${job['Submission ID']}')">Delete</button>
-
+              <button class="btn btn-open" style="margin-left:4px;" onclick="window.open('https://drive.google.com/file/d/${job['Drive File ID']}/view?usp=sharing', '_blank')">Drive</button>
+              <button class="btn btn-delete" style="margin-left:4px;" onclick="openDeleteModal('${job['Submission ID']}')">Del</button>
             </td>
-
           </tr>
-
         `;
-
       }).join('');
-
       document.getElementById('loadMoreBtn').style.display = displayCount < currentJobs.length ? 'block' : 'none';
-
     }
-
     async function toggleCompleted(subId, isChecked) {
-
       const job = currentJobs.find(j => j['Submission ID'] === subId);
-
       const previousStatus = job ? job['Print Status'] : "";
-
       if (job) job['Print Status'] = isChecked ? "1" : "";
-
       renderTable(); 
-
       try { await apiRequest({ action: 'adminTogglePrintStatus', subId: subId, isCompleted: isChecked });
-
       } catch (err) { alert("Status update failed. Reverting..."); if (job) job['Print Status'] = previousStatus; renderTable(); }
-
     }
-
     function openDeleteModal(subId) { jobToDelete = subId; document.getElementById('deleteModal').classList.add('active'); }
-
     async function executeDelete() {
-
       if(!jobToDelete) return;
-
       const subId = jobToDelete; closeModal('deleteModal');
-
       const idx = currentJobs.findIndex(j => j['Submission ID'] === subId);
-
       if(idx > -1) currentJobs.splice(idx, 1);
-
       renderTable(); 
-
       try { await apiRequest({ action: 'adminDeleteJob', subId: subId }); } catch (err) { alert("Delete failed on server."); loadJobsQuietly(); }
-
     }
-
     function viewJob(subId) {
-
       const job = currentJobs.find(j => j['Submission ID'] === subId);
-
       if(!job) return;
-
       let details = []; try { details = JSON.parse(job['Page Details'] || "[]"); } catch(e) {}
-
       const directUrl = `https://drive.google.com/file/d/${job['Drive File ID']}/view?usp=sharing`;
-
       const isMobile = window.innerWidth <= 768;
-
       let html = `<div style="display:flex; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:10px;">`;
-
       html += `<div><p><strong>File:</strong> ${job['File Name']}</p><p><strong>Roll:</strong> ${job.Roll}</p></div>`;
-
       html += `<div><strong>Cost Breakdown:</strong><br><span style="font-size:12px; color:#555;">` + details.map(d => `P${d.page}: ${d.intensity} (${d.cost} Tk)`).join(', ') + `</span></div></div>`;
-
       if (isMobile) {
-
         html += `<div style="text-align:center; padding: 25px 15px; border: 1px dashed #cbd5e1; border-radius: 8px; margin-top: 15px; background: #f8fafc;">
-
             <p style="margin-bottom: 15px; color: #475569; font-size: 14px;">Mobile browser cookie policy blocks embedded preview.</p>
-
             <a href="${directUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block; background:var(--primary); color:white; padding:10px 20px; border-radius:6px; text-decoration:none; font-weight:600;">Open PDF Document</a>
-
           </div>`;
-
       } else { html += `<iframe src="https://drive.google.com/file/d/${job['Drive File ID']}/preview" width="100%" height="450px" style="border:1px solid #ccc; border-radius:8px;"></iframe>`; }
-
       document.getElementById('orderDetails').innerHTML = html;
-
       document.getElementById('viewModal').classList.add('active');
-
     }
-
-
 
     /* PAYMENT LOGIC */
-
     async function loadAllDues() {
-
       try {
-
         const dues = await apiRequest({ action: 'adminGetAllDues' });
-
         const tbody = document.getElementById('allDuesList');
-
         if (!dues || dues.length === 0) { tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:25px;">No customer records found.</td></tr>`; return; }
-
         tbody.innerHTML = dues.map(item => {
-
           let badgeHtml = item.due > 0 ? `<span class="badge danger">Due: ${item.due} Tk</span>` : (item.due < 0 ? `<span class="badge success">Balance: ${Math.abs(item.due)} Tk</span>` : `<span class="badge">Settled</span>`);
-
           return `<tr><td><strong>${item.roll}</strong></td><td>${badgeHtml}</td><td><button class="btn btn-view" onclick="openStudent('${item.roll}')">View</button></td></tr>`;
-
         }).join('');
-
       } catch (err) { document.getElementById('allDuesList').innerHTML = `<tr><td colspan="3" style="text-align:center; color:red; padding:20px;">Failed to load records.</td></tr>`; }
-
     }
-
     function searchRoll() {
-
       const roll = document.getElementById('searchInput').value;
-
       if(!/^\d{7}$/.test(roll)) return alert("Please enter a valid 7-digit roll number.");
-
       openStudent(roll);
-
     }
-
     async function openStudent(roll) {
-
       document.getElementById('modalRollTitle').innerText = roll;
-
       document.getElementById('checkDueValContainer').style.background = '#f1f5f9';
-
       document.getElementById('checkDueValText').innerHTML = 'Loading...';
-
       document.getElementById('historyList').innerHTML = ''; document.getElementById('recentPrintList').innerHTML = ''; document.getElementById('payAmount').value = '';
-
       document.getElementById('studentDetailModal').classList.add('active');
-
       
-
       try {
-
         const data = await apiRequest({ action: 'getCustomerData', roll: roll });
-
         currentDueContext = parseFloat(data.due) || 0; currentRollContext = roll;
-
         const dueContainer = document.getElementById('checkDueValContainer'); const dueText = document.getElementById('checkDueValText');
-
         if (currentDueContext > 0) { dueContainer.style.background = '#fee2e2'; dueText.innerHTML = `Current Due: <span style="color:var(--danger)">${currentDueContext} Tk</span>`; } 
-
         else if (currentDueContext < 0) { dueContainer.style.background = '#d1fae5'; dueText.innerHTML = `Advance Balance: <span style="color:var(--success)">${Math.abs(currentDueContext)} Tk</span>`; } 
-
         else { dueContainer.style.background = '#f1f5f9'; dueText.innerHTML = `Settled: <span style="color:#475569">0 Tk</span>`; }
-
         
-
         let payHtml = '<table><thead><tr><th>Date</th><th>Time</th><th>Paid Amount</th></tr></thead><tbody>';
-
         if (!data.history || data.history.length === 0) { payHtml += '<tr><td colspan="3" style="text-align:center; padding: 15px; color:#64748b;">No payment records found.</td></tr>'; } 
-
         else { data.history.forEach(h => { payHtml += `<tr><td>${h.date}</td><td>${h.time}</td><td><strong style="color:var(--success)">+${h.amount} Tk</strong></td></tr>`; }); }
-
         document.getElementById('historyList').innerHTML = payHtml + '</tbody></table>';
-
           
-
         let printHtml = '<table><thead><tr><th>Date</th><th>Time</th><th>Cost</th><th>Status</th></tr></thead><tbody>';
-
         if (!data.recentPrints || data.recentPrints.length === 0) { printHtml += '<tr><td colspan="4" style="text-align:center; padding: 15px; color:#64748b;">No print records found.</td></tr>'; } 
-
         else {
-
             data.recentPrints.forEach(p => {
-
                 const badge = p.status === 'Completed' ? '<span class="badge success">Completed</span>' : '<span class="badge">Pending</span>';
-
                 printHtml += `<tr><td>${p.date}</td><td>${p.time}</td><td>${p.amount} Tk</td><td>${badge}</td></tr>`;
-
             });
-
         }
-
         document.getElementById('recentPrintList').innerHTML = printHtml + '</tbody></table>';
-
       } catch (err) { alert("Error: " + err.message); document.getElementById('studentDetailModal').classList.remove('active'); }
-
     }
-
     async function handlePay() {
-
       const amt = parseFloat(document.getElementById('payAmount').value);
-
       if(!amt || amt <= 0) return alert("Please enter a valid amount greater than 0.");
-
       const btn = document.getElementById('payBtn'); btn.innerText = "Processing..."; btn.disabled = true;
-
       try {
-
         const data = await apiRequest({ action: 'adminReceivePayment', roll: currentRollContext, amount: amt });
-
         let msg = data.remainingDue > 0 ? `Remaining Due: <strong style="color:var(--danger)">${data.remainingDue} Tk</strong>` : (data.remainingDue < 0 ? `New Advance Balance: <strong style="color:var(--success)">${Math.abs(data.remainingDue)} Tk</strong>` : `<strong style="color:#475569">Account settled entirely.</strong>`);
-
         document.getElementById('successDetails').innerHTML = `Amount Received: <strong>${amt} Tk</strong><br><br>${msg}`;
-
         document.getElementById('successModal').classList.add('active');
-
         await openStudent(currentRollContext); loadAllDues();
-
       } catch (err) { alert("Error: " + err.message); } 
-
       finally { btn.innerText = "Confirm Payment"; btn.disabled = false; document.getElementById('payAmount').value = ''; }
-
     }
-
   </script>
-
 </body>
-
 </html>
