@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Print Portal</title>
   
-  <!-- Modern Google Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -14,185 +13,76 @@
   
   <style>
     :root { 
-      --primary: #2563eb; 
-      --primary-hover: #1d4ed8;
+      --primary: #2563eb; --primary-hover: #1d4ed8;
       --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
-      --text-main: #1e293b; 
-      --text-muted: #64748b;
-      --danger: #ef4444; 
-      --success: #10b981; 
+      --text-main: #1e293b; --text-muted: #64748b;
+      --danger: #ef4444; --success: #10b981; 
       --card-bg: rgba(255, 255, 255, 0.95);
     }
     
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
     
-    body { 
-      background: var(--bg-gradient); 
-      color: var(--text-main); 
-      min-height: 100vh; 
-      padding: 40px 20px; 
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .container { 
-      width: 100%; 
-      max-width: 800px; 
-    }
-
-    /* Hero Section */
+    body { background: var(--bg-gradient); color: var(--text-main); min-height: 100vh; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+    .container { width: 100%; max-width: 800px; }
+    
     .header { text-align: center; margin-bottom: 50px; }
     .header h1 { font-size: 2.5rem; font-weight: 700; color: #0f172a; margin-bottom: 10px; letter-spacing: -0.5px;}
     .header p { color: var(--text-muted); font-size: 1.1rem; }
 
-    /* Modern Grid Layout */
-    .cards { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-      gap: 30px; 
-    }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+    .card { background: var(--card-bg); padding: 40px 25px; border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01); text-align: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(255,255,255,0.5); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; }
+    .card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
 
-    /* Floating Action Cards */
-    .card { 
-      background: var(--card-bg); 
-      padding: 40px 25px; 
-      border-radius: 20px; 
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01); 
-      text-align: center; 
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid rgba(255,255,255,0.5);
-      backdrop-filter: blur(10px);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .card:hover { 
-      transform: translateY(-8px); 
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); 
-    }
-
-    /* SVG Icons for Cards */
-    .card-icon {
-      width: 70px; height: 70px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 20px;
-    }
+    .card-icon { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
     .icon-print { background: #dbeafe; color: var(--primary); }
     .icon-wallet { background: #d1fae5; color: var(--success); }
-
     .card h3 { font-size: 1.5rem; font-weight: 600; margin-bottom: 8px; color: #0f172a;}
     .card p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px; }
 
-    /* Standardized Buttons */
-    button { 
-      background: var(--primary); 
-      color: white; 
-      border: none; 
-      padding: 14px 28px; 
-      border-radius: 12px; 
-      font-size: 16px; 
-      font-weight: 600;
-      cursor: pointer; 
-      width: 100%; 
-      transition: all 0.2s ease; 
-      display: inline-flex; 
-      justify-content: center; 
-      align-items: center; 
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
-    }
-    button:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 15px -3px rgba(37, 99, 235, 0.3); }
-    button:active { transform: translateY(0); }
-    button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none;}
+    button { background: var(--primary); color: white; border: none; padding: 14px 28px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); }
+    button:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 15px -3px rgba(37, 99, 235, 0.3); }
+    button:active:not(:disabled) { transform: translateY(0); }
+    button:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none; }
     
     .btn-success { background: var(--success); box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2); }
     .btn-success:hover { background: #059669; box-shadow: 0 6px 15px -3px rgba(16, 185, 129, 0.3); }
-    
     .btn-cancel { background: #f1f5f9; color: #475569; box-shadow: none;}
     .btn-cancel:hover { background: #e2e8f0; color: #0f172a; box-shadow: none;}
 
-    /* Animated Modals with Glassmorphism */
-    .modal { 
-      display: flex; 
-      position: fixed; inset: 0; 
-      background: rgba(15, 23, 42, 0.4); 
-      backdrop-filter: blur(6px);
-      padding: 20px; align-items: center; justify-content: center; 
-      z-index: 50; 
-      opacity: 0; visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
+    .modal { display: flex; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(6px); padding: 20px; align-items: center; justify-content: center; z-index: 50; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
     .modal.active { opacity: 1; visibility: visible; }
-    
-    .modal-content { 
-      background: #ffffff; 
-      width: 100%; max-width: 550px; 
-      padding: 35px; border-radius: 20px; 
-      max-height: 90vh; overflow-y: auto; 
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-      transform: translateY(20px) scale(0.95);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+    .modal-content { background: #ffffff; width: 100%; max-width: 550px; padding: 35px; border-radius: 20px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: translateY(20px) scale(0.95); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
     .modal.active .modal-content { transform: translateY(0) scale(1); }
 
-    .close-btn { 
-      float: right; background: none; color: #94a3b8; 
-      width: 32px; height: 32px; padding: 0; 
-      font-size: 24px; line-height: 1; margin-top: -10px; margin-right: -10px;
-      border-radius: 50%; box-shadow: none;
-    }
-    .close-btn:hover { background: #f1f5f9; color: var(--danger); transform: none;}
+    .close-btn { position: absolute; top: 15px; right: 15px; background: #f1f5f9; color: #64748b; width: 34px; height: 34px; border-radius: 50%; font-size: 24px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; transition: all 0.2s ease; z-index: 10; }
+    .close-btn:hover { background: #fee2e2; color: var(--danger); }
 
-    /* Form Inputs */
     .form-group { margin-bottom: 20px; text-align: left; }
     label { display: block; margin-bottom: 8px; font-weight: 600; color: #334155; font-size: 14px;}
     
-    input[type="text"], select { 
-      width: 100%; padding: 14px; 
-      border: 2px solid #e2e8f0; border-radius: 12px; 
-      font-size: 15px; color: #0f172a;
-      transition: all 0.2s ease; background: #f8fafc;
-    }
-    input[type="text"]:focus, select:focus { 
-      outline: none; border-color: var(--primary); background: #fff;
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); 
-    }
-
-    /* Modern File Input */
-    input[type="file"] {
-      width: 100%; padding: 15px;
-      border: 2px dashed #cbd5e1; border-radius: 12px;
-      background: #f8fafc; cursor: pointer; transition: all 0.2s;
-    }
+    input[type="text"], select { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px; color: #0f172a; transition: all 0.2s ease; background: #f8fafc; }
+    input[type="text"]:focus, select:focus { outline: none; border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+    input[type="file"] { width: 100%; padding: 15px; border: 2px dashed #cbd5e1; border-radius: 12px; background: #f8fafc; cursor: pointer; transition: all 0.2s; }
     input[type="file"]:hover { border-color: var(--primary); background: #eff6ff;}
-    input[type="file"]::file-selector-button {
-      background: #e2e8f0; color: #475569;
-      border: none; padding: 8px 16px; border-radius: 8px;
-      margin-right: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s;
-    }
+    input[type="file"]::file-selector-button { background: #e2e8f0; color: #475569; border: none; padding: 8px 16px; border-radius: 8px; margin-right: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
     input[type="file"]::file-selector-button:hover { background: #cbd5e1; color: #0f172a;}
 
-    /* Order Summary & Preview Grid */
     .summary-box { background: #f8fafc; padding: 20px; border-radius: 16px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
     .summary-box p { display: flex; justify-content: space-between; margin-bottom: 8px; color: #475569;}
     .summary-box .total-row { font-size: 1.25rem; font-weight: 700; color: #0f172a; border-top: 2px dashed #cbd5e1; padding-top: 10px; margin-top: 10px;}
-    
     .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; margin-top: 20px; }
     .page-thumb { border: 1px solid #e2e8f0; padding: 8px; text-align: center; border-radius: 10px; font-size: 12px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.02);}
     .page-thumb img { width: 100%; height: auto; border: 1px solid #f1f5f9; border-radius: 6px; margin-bottom: 8px; }
 
-    /* Tables for History */
     .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; background: white;}
     .history-table th, .history-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
     .history-table th { background: #f8fafc; font-weight: 600; color: #475569; letter-spacing: 0.5px; text-transform: uppercase; font-size: 12px;}
     .history-table tr:hover td { background: #f8fafc; }
     
-    /* Badges */
     .badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
     .badge.success { background: #d1fae5; color: #065f46; }
     .badge.pending { background: #fef08a; color: #854d0e; }
 
-    /* Spinners & Progress */
     .spinner { border: 4px solid #f1f5f9; border-top: 4px solid var(--primary); border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; margin: 0 auto; }
     .spinner-small { width: 20px; height: 20px; margin-right: 10px; display: none; animation: spin 1s linear infinite;}
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -202,7 +92,6 @@
     
     .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 28px; border-radius: 30px; display: none; z-index: 100; font-weight: 500; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);}
     
-    /* Confirmation Box */
     .confirm-box { text-align: center; padding: 20px 10px; }
     .confirm-box h2 { color: #0f172a; margin-bottom: 10px; }
     .confirm-box p { color: #64748b; }
@@ -212,12 +101,17 @@
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
   </style>
 </head>
 <body>
   
   <div class="container">
+    
+    <!-- Offline Banner Notice -->
+    <div id="offlineNotice" style="display:none; background: #fee2e2; color: #991b1b; padding: 18px; text-align: center; border-radius: 12px; margin-bottom: 25px; font-weight: 600; font-size: 15px; border: 1px solid #f87171; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      ⚠️ The printing service is currently offline. You can still check your balances and history.
+    </div>
+
     <div class="header">
       <h1>Print Your File (PDF)</h1><br>
     </div>
@@ -229,7 +123,7 @@
         </div>
         <h3>Print Document</h3>
         <p>Upload PDFs and get instant cost estimates.</p>
-        <button onclick="openModal('printModal')">Start Printing</button>
+        <button id="startPrintBtn" onclick="openModal('printModal')">Start Printing</button>
       </div>
 
       <div class="card">
@@ -247,7 +141,7 @@
   <div class="modal" id="printModal">
     <div class="modal-content">
       <button class="close-btn" onclick="closeModal('printModal')">&times;</button>
-      <h2 style="margin-bottom: 25px; color:#0f172a;">New Print Order</h2>
+      <h2 style="margin-bottom: 25px; margin-top:10px; color:#0f172a;">New Print Order</h2>
       
       <div class="form-group">
         <label>Your Roll Number</label>
@@ -293,8 +187,9 @@
   <!-- Confirm Upload Modal -->
   <div class="modal" id="confirmModal" style="z-index: 60;">
     <div class="modal-content" style="max-width: 400px;">
+      <button class="close-btn" onclick="closeModal('confirmModal')">&times;</button>
       <div class="confirm-box" id="confirmBoxOptions">
-        <h2>Confirm</h2>
+        <h2 style="margin-top:10px;">Confirm Submission</h2>
         <div class="price"><span id="confirmTotal">0</span> Tk</div>
         <div class="confirm-btn-group">
           <button class="btn-cancel" onclick="closeModal('confirmModal')">Cancel</button>
@@ -314,7 +209,7 @@
   <div class="modal" id="dueModal">
     <div class="modal-content" style="max-width: 700px;">
       <button class="close-btn" onclick="closeModal('dueModal')">&times;</button>
-      <h2 style="margin-bottom: 25px; color:#0f172a;">Account Dashboard</h2>
+      <h2 style="margin-bottom: 25px; margin-top:10px; color:#0f172a;">Account Dashboard</h2>
       
       <div class="form-group" style="display:flex; gap:15px; align-items: flex-end;">
         <div style="flex: 1; margin-bottom: 0;">
@@ -331,12 +226,10 @@
         <div id="dueAmountContainer" style="text-align: center; padding: 20px; background: #fee2e2; border-radius: 16px; font-size: 22px; font-weight: 700; margin-bottom: 30px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
           <span id="dueAmountTxt"></span>
         </div>
-        
         <h4 style="margin-top: 20px; color: #334155; font-size: 1.1rem; margin-bottom: 10px;">Payment History</h4>
         <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 12px; background: white;">
           <div id="paymentHistoryList"></div>
         </div>
-        
         <h4 style="margin-top: 30px; color: #334155; font-size: 1.1rem; margin-bottom: 10px;">Print History</h4>
         <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 12px; background: white;">
           <div id="recentPrintList"></div>
@@ -348,7 +241,7 @@
   <div class="toast" id="toast">Message</div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbynJZqoaesqXOeZ-na4pnHUo-eSNIVs0WCWa5ExxpZHnMsTqN6VSB2CnVQpzNctzcXV/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxerT1VWQPTlRhEYzI-iJPGhEDCwyx6ClzD9nANpFke-CxP63lDEylIXhTv7ILB56P7/exec';
 
     const CONFIG = {
       pricing: {
@@ -360,6 +253,19 @@
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
     let currentJob = null; 
+
+    // Fetch system status on load to disable the button if necessary
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const res = await apiRequest({ action: 'getSystemStatus' });
+        if (res.printStatus === 'OFF') {
+          const btn = document.getElementById('startPrintBtn');
+          btn.disabled = true;
+          btn.innerText = 'Service Disabled';
+          document.getElementById('offlineNotice').style.display = 'block';
+        }
+      } catch(e) {}
+    });
 
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     
@@ -424,13 +330,11 @@
 
           for (let i = 1; i <= numPages; i++) {
             document.getElementById('processStatus').innerText = `Analyzing page ${i} of ${numPages}...`;
-            
             const page = await pdf.getPage(i);
             const viewport = page.getViewport({ scale: 0.2 }); 
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = viewport.width; canvas.height = viewport.height;
-            
             await page.render({ canvasContext: ctx, viewport: viewport }).promise;
             
             const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
@@ -447,7 +351,6 @@
             
             const cost = CONFIG.pricing[mode][intensity];
             totalCost += cost;
-            
             pageDetails.push({ page: i, intensity, cost });
             
             const thumbDiv = document.createElement('div');
@@ -460,24 +363,21 @@
           document.getElementById('summaryPages').innerText = numPages;
           document.getElementById('summaryModeDisplay').innerText = mode === 'bw' ? 'Black & White' : 'Color';
           document.getElementById('summaryCost').innerText = roundedTotal;
-          
           document.getElementById('processingArea').style.display = 'none';
           document.getElementById('previewArea').style.display = 'block';
           
           const b64Reader = new FileReader();
           b64Reader.onload = (e) => {
-            const base64Data = e.target.result.split(',')[1];
             currentJob = {
               subId: crypto.randomUUID(), roll: roll, fileName: file.name, mode: mode,
               totalPages: numPages, pageDetails: pageDetails, totalAmount: roundedTotal,
-              base64: base64Data
+              base64: e.target.result.split(',')[1]
             };
           };
           b64Reader.readAsDataURL(file);
 
         } catch (err) {
-          console.error(err);
-          showToast('Error parsing PDF', true);
+          console.error(err); showToast('Error parsing PDF', true);
           document.getElementById('processBtn').disabled = false;
           document.getElementById('processingArea').style.display = 'none';
         }
@@ -488,18 +388,13 @@
     async function apiRequest(payload) {
       try {
         const response = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload),
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
-          }
+          method: 'POST', body: JSON.stringify(payload),
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }
         });
         const resJson = await response.json();
         if (resJson.success) return resJson.data;
         throw new Error(resJson.error || 'Server error occurred');
-      } catch (err) {
-        throw new Error(err.message || 'Server Connection Failed');
-      }
+      } catch (err) { throw new Error(err.message || 'Server Connection Failed'); }
     }
 
     function submitOrder() {
@@ -512,10 +407,8 @@
     async function executeUpload() {
       document.getElementById('confirmBoxOptions').style.display = 'none';
       document.getElementById('uploadProgressContainer').style.display = 'block';
-      
       const textElement = document.getElementById('uploadPercentText');
       const fill = document.getElementById('uploadFill');
-      
       const CHUNK_SIZE = 1024 * 1024 * 3; 
       const totalChunks = Math.ceil(currentJob.base64.length / CHUNK_SIZE);
       
@@ -523,99 +416,57 @@
         for (let i = 0; i < totalChunks; i++) {
           const chunk = currentJob.base64.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
           await apiRequest({ action: 'uploadChunk', subId: currentJob.subId, chunkIndex: i, chunkBase64: chunk });
-          
           const percent = Math.round(((i + 1) / totalChunks) * 85); 
           fill.style.width = percent + '%';
           textElement.innerText = `Uploading chunks: ${percent}%`;
         }
-        
         textElement.innerText = "Finalizing upload...";
         const { base64, ...jobMeta } = currentJob;
         await apiRequest({ action: 'submitPrintJob', ...jobMeta });
         
-        fill.style.width = `100%`;
-        textElement.innerText = "Upload Completed!";
-        textElement.style.color = "var(--success)";
+        fill.style.width = `100%`; textElement.innerText = "Upload Completed!"; textElement.style.color = "var(--success)";
         showToast('File uploaded successfully!');
-        
-        setTimeout(() => {
-          closeModal('confirmModal');
-          closeModal('printModal');
-        }, 1500);
-        
+        setTimeout(() => { closeModal('confirmModal'); closeModal('printModal'); }, 1500);
       } catch (err) {
-        showToast(err.message, true);
-        document.getElementById('submitBtn').disabled = false;
-        textElement.innerText = 'Upload Failed';
-        textElement.style.color = "var(--danger)";
-        setTimeout(() => {
-          document.getElementById('confirmBoxOptions').style.display = 'block';
-          document.getElementById('uploadProgressContainer').style.display = 'none';
-        }, 3000);
+        showToast(err.message, true); document.getElementById('submitBtn').disabled = false;
+        textElement.innerText = 'Upload Failed'; textElement.style.color = "var(--danger)";
+        setTimeout(() => { document.getElementById('confirmBoxOptions').style.display = 'block'; document.getElementById('uploadProgressContainer').style.display = 'none'; }, 3000);
       }
     }
 
     async function checkDue() {
       const roll = document.getElementById('dueRoll').value;
       if (!/^\d{7}$/.test(roll)) return showToast('Enter exactly 7-digit roll', true);
-      
-      const btn = document.getElementById('checkBtn');
-      const spinner = document.getElementById('checkSpinner');
-      const text = document.getElementById('checkText');
-      
-      btn.disabled = true;
-      spinner.style.display = 'block';
-      text.innerText = 'Searching...';
+      const btn = document.getElementById('checkBtn'); const spinner = document.getElementById('checkSpinner'); const text = document.getElementById('checkText');
+      btn.disabled = true; spinner.style.display = 'block'; text.innerText = 'Searching...';
       
       try {
         const data = await apiRequest({ action: 'getCustomerData', roll: roll });
-
         const dueAmt = parseFloat(data.due) || 0;
         const dueContainer = document.getElementById('dueAmountContainer');
         const dueText = document.getElementById('dueAmountTxt');
         
-        if (dueAmt > 0) {
-            dueContainer.style.background = '#fee2e2'; 
-            dueText.innerHTML = `Total Due: <span style="color:var(--danger)">${dueAmt} Tk</span>`;
-        } else if (dueAmt < 0) {
-            dueContainer.style.background = '#d1fae5'; 
-            dueText.innerHTML = `Balance: <span style="color:var(--success)">${Math.abs(dueAmt)} Tk</span>`;
-        } else {
-            dueContainer.style.background = '#f1f5f9'; 
-            dueText.innerHTML = `Settled: <span style="color:#475569">0 Tk</span>`;
-        }
+        if (dueAmt > 0) { dueContainer.style.background = '#fee2e2'; dueText.innerHTML = `Total Due: <span style="color:var(--danger)">${dueAmt} Tk</span>`; } 
+        else if (dueAmt < 0) { dueContainer.style.background = '#d1fae5'; dueText.innerHTML = `Balance: <span style="color:var(--success)">${Math.abs(dueAmt)} Tk</span>`; } 
+        else { dueContainer.style.background = '#f1f5f9'; dueText.innerHTML = `Settled: <span style="color:#475569">0 Tk</span>`; }
         
         let payHtml = '<table class="history-table"><thead><tr><th>Date</th><th>Time</th><th>Paid Amount</th></tr></thead><tbody>';
-        if (!data.history || data.history.length === 0) {
-            payHtml += '<tr><td colspan="3" style="text-align:center; padding: 20px; color:#64748b;">No payment records found.</td></tr>';
-        } else {
-            data.history.forEach(h => {
-                payHtml += `<tr><td>${h.date}</td><td>${h.time}</td><td><strong style="color:var(--success)">+${h.amount} Tk</strong></td></tr>`;
-            });
-        }
-        payHtml += '</tbody></table>';
-        document.getElementById('paymentHistoryList').innerHTML = payHtml;
+        if (!data.history || data.history.length === 0) { payHtml += '<tr><td colspan="3" style="text-align:center; padding: 20px; color:#64748b;">No payment records found.</td></tr>'; } 
+        else { data.history.forEach(h => { payHtml += `<tr><td>${h.date}</td><td>${h.time}</td><td><strong style="color:var(--success)">+${h.amount} Tk</strong></td></tr>`; }); }
+        payHtml += '</tbody></table>'; document.getElementById('paymentHistoryList').innerHTML = payHtml;
           
         let printHtml = '<table class="history-table"><thead><tr><th>Date</th><th>Time</th><th>Cost</th><th>Status</th></tr></thead><tbody>';
-        if (!data.recentPrints || data.recentPrints.length === 0) {
-            printHtml += '<tr><td colspan="4" style="text-align:center; padding: 20px; color:#64748b;">No print records found.</td></tr>';
-        } else {
+        if (!data.recentPrints || data.recentPrints.length === 0) { printHtml += '<tr><td colspan="4" style="text-align:center; padding: 20px; color:#64748b;">No print records found.</td></tr>'; } 
+        else {
             data.recentPrints.forEach(p => {
                 const badge = p.status === 'Completed' ? '<span class="badge success">Completed</span>' : '<span class="badge pending">Pending</span>';
                 printHtml += `<tr><td>${p.date}</td><td>${p.time}</td><td><strong>${p.amount} Tk</strong></td><td>${badge}</td></tr>`;
             });
         }
-        printHtml += '</tbody></table>';
-        document.getElementById('recentPrintList').innerHTML = printHtml;
-          
+        printHtml += '</tbody></table>'; document.getElementById('recentPrintList').innerHTML = printHtml;
         document.getElementById('dueResults').style.display = 'block';
-      } catch (err) {
-        showToast(err.message, true);
-      } finally {
-        btn.disabled = false;
-        spinner.style.display = 'none';
-        text.innerText = 'Search';
-      }
+      } catch (err) { showToast(err.message, true); } 
+      finally { btn.disabled = false; spinner.style.display = 'none'; text.innerText = 'Search'; }
     }
   </script>
 </body>
