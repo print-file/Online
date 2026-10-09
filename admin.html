@@ -111,11 +111,11 @@
 
   <!-- Fullscreen Secure Admin Gate -->
   <div id="loginOverlay">
-    <h2 style="color:#0f172a; margin-bottom: 5px;">Admin Security Gate</h2>
-    <p style="color:#64748b; font-size:14px;">Enter Master PIN to continue</p>
+    <h2 style="color:#0f172a; margin-bottom: 5px;">Admin</h2>
+    <p style="color:#64748b; font-size:14px;">Enter Password</p>
     <input type="password" id="pinInput" placeholder="****" maxlength="4">
-    <button class="btn btn-primary" onclick="login()" style="width:100%; max-width: 320px; padding: 14px; font-size: 15px;">Unlock Portal</button>
-    <p id="loginErr" style="color:red; display:none; margin-top:12px; font-size:14px; font-weight:600;">Access Denied: Incorrect PIN</p>
+    <button class="btn btn-primary" onclick="login()" style="width:100%; max-width: 320px; padding: 14px; font-size: 15px;">Enter</button>
+    <p id="loginErr" style="color:red; display:none; margin-top:12px; font-size:14px; font-weight:600;">Access Denied</p>
   </div>
 
   <div class="container">
@@ -251,7 +251,7 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwQgfcqz3sjcMglArOjcYUZdjJ8LPf5w4pQFmQfz-EDmD3z5kdXGYBrE20JfywqccPQ/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycby62B_ehwFbzrmm1Szw9UkFSxgVDH_HJ274gV3y66p5CCYY-dE0JgJwEI_KI_JMcZzQ/exec';
 
     let ADMIN_PIN = '';
     let currentJobs = [];
