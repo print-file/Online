@@ -181,7 +181,8 @@
         <label>Page Breakdown</label>
         <div class="preview-grid" id="thumbnailGrid" style="max-height: 250px; overflow-y: auto; padding: 5px;"></div>
         
-        <button id="submitBtn" onclick="submitOrder()" style="margin-top: 25px; width: 100%;">Confirm & Upload</button>
+        <!-- FIXED STICKY BUTTON: STAYS ON SCREEN WITHOUT SCROLLING -->
+        <button id="submitBtn" onclick="submitOrder()" style="margin-top: 20px; width: 100%; position: sticky; bottom: 0; z-index: 20; box-shadow: 0 -4px 15px rgba(0,0,0,0.1), 0 4px 14px rgba(37,99,235,0.35);">Confirm & Upload</button>
       </div>
     </div>
   </div>
