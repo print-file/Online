@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin</title>
+  <title>Admin - Unified Control Portal</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -111,10 +111,16 @@
 
   <!-- Fullscreen Secure Admin Gate -->
   <div id="loginOverlay">
-    <h2 style="color:#0f172a; margin-bottom: 5px;">Admin</h2>
+    <h2 style="color:#0f172a; margin-bottom: 5px;">Admin Gate</h2>
     <p style="color:#64748b; font-size:14px;">Enter Password</p>
-    <input type="password" id="pinInput" placeholder="****" maxlength="4">
-    <button class="btn btn-primary" onclick="login()" style="width:100%; max-width: 320px; padding: 14px; font-size: 15px;">Enter</button>
+    <!-- ADDED: onkeypress event handler -->
+    <input type="password" id="pinInput" placeholder="****" maxlength="4" onkeypress="handleLoginEnter(event)">
+    <button class="btn btn-primary" id="loginBtn" onclick="login()" style="width:100%; max-width: 320px; padding: 14px; font-size: 15px;">
+        <svg class="spinner-svg" id="loginSpinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><polyline points="21 3 21 8 16 8"></polyline>
+        </svg>
+        <span id="loginBtnText">Enter</span>
+    </button>
     <p id="loginErr" style="color:red; display:none; margin-top:12px; font-size:14px; font-weight:600;">Access Denied: Incorrect Password</p>
   </div>
 
@@ -251,7 +257,7 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwQgfcqz3sjcMglArOjcYUZdjJ8LPf5w4pQFmQfz-EDmD3z5kdXGYBrE20JfywqccPQ/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxerT1VWQPTlRhEYzI-iJPGhEDCwyx6ClzD9nANpFke-CxP63lDEylIXhTv7ILB56P7/exec';
 
     let ADMIN_PIN = '';
     let currentJobs = [];
@@ -299,8 +305,27 @@
       }
     }
 
+    // ADDED: Function to handle 'Enter' keypress
+    function handleLoginEnter(event) {
+        if (event.key === "Enter") {
+            login();
+        }
+    }
+
     async function login() {
-      ADMIN_PIN = document.getElementById('pinInput').value || '7281';
+      const pinInputElem = document.getElementById('pinInput');
+      ADMIN_PIN = pinInputElem.value || '7281';
+      const loginBtn = document.getElementById('loginBtn');
+      const loginSpinner = document.getElementById('loginSpinner');
+      const loginBtnText = document.getElementById('loginBtnText');
+      const loginErr = document.getElementById('loginErr');
+
+      // Set loading state
+      loginBtn.disabled = true;
+      loginSpinner.style.display = 'inline-block';
+      loginBtnText.innerText = 'Verifying...';
+      loginErr.style.display = 'none';
+
       try {
         await loadJobs(); // Tests the PIN by requesting secure job data
         const statRes = await apiRequest({ action: 'getSystemStatus' });
@@ -308,7 +333,13 @@
         document.getElementById('loginOverlay').style.display = 'none';
         setInterval(() => { if (activeView === 'queue') loadJobsQuietly(); }, 30000);
       } catch (err) { 
-        document.getElementById('loginErr').style.display = 'block'; 
+        loginErr.style.display = 'block'; 
+        pinInputElem.value = ''; // clear input on error
+      } finally {
+        // Reset loading state
+        loginBtn.disabled = false;
+        loginSpinner.style.display = 'none';
+        loginBtnText.innerText = 'Enter';
       }
     }
 
