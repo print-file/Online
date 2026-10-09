@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Payment Control</title>
+  <style>
+    :root { --primary: #2563eb; --bg: #f8fafc; --text: #1e293b; --danger: #ef4444; --success: #10b981; }
+    body { background-color: var(--bg); color: var(--text); font-family: system-ui, sans-serif; padding: 20px; text-align: center; margin: 0; }
+    .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+    button { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer; width: 100%; transition: opacity 0.2s; display: inline-flex; align-items: center; justify-content: center;}
+    button:hover { opacity: 0.9; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    #loginOverlay { position: fixed; inset: 0; background: white; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    
+    .payment-box { background: #f1f5f9; padding: 20px; border-radius: 8px; margin-top: 20px; text-align: left; }
+    .payment-box h3 { margin-top: 0; color: #334155; }
+
+    /* Tables */
+    .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; text-align: left; }
+    .history-table th, .history-table td { padding: 12px 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
+    .history-table th { background: #f8fafc; font-weight: 600; color: #475569; }
+    
+    .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block; }
+    .badge.danger { background: #fee2e2; color: #b91c1c; }
+    .badge.success { background: #d1fae5; color: #065f46; }
+    .badge.pending { background: #fef08a; color: #854d0e; }
+
+    .btn-view { background: #4b5563; padding: 6px 12px; border-radius: 6px; font-size: 12px; width: auto; margin:0;}
+
+    /* Modal styles */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); padding: 20px; align-items: center; justify-content: center; z-index: 50; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; width: 100%; max-width: 600px; padding: 25px; border-radius: 12px; max-height: 90vh; overflow-y: auto; position: relative; }
+    .close-btn { position: absolute; right: 20px; top: 20px; background: none; color: var(--danger); font-size: 24px; border: none; cursor: pointer; width: auto; padding: 0; }
+
+    .spinner-small { width: 18px; height: 18px; margin-right: 8px; display: none; animation: spin 1s linear infinite;}
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div id="loginOverlay">
+    <h2>Admin Login</h2>
+    <input type="password" id="pinInput" placeholder="Enter PIN (Default: 1234)" style="max-width:300px;">
+    <button onclick="login()" style="max-width:300px; margin-top: 10px;">Enter System</button>
+    <p id="loginErr" style="color:red; display:none;">Invalid PIN or Connection Error</p>
+  </div>
+
+  <div class="container">
+    <h2>Payment Management</h2>
+    <p style="margin-bottom:20px; color:#666;">View all balances or search for a specific roll</p>
+    
+    <div style="display:flex; gap:10px; margin-bottom: 20px;">
+      <input type="text" id="searchInput" placeholder="Search by 7-digit Roll" maxlength="7">
+      <button id="searchBtn" onclick="searchRoll()" style="width:auto; margin:10px 0;">
+        <svg class="spinner-small" id="searchSpinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><polyline points="21 3 21 8 16 8"></polyline></svg>
+        <span id="searchText">Search</span>
+      </button>
+      <button onclick="loadAllDues()" style="width:auto; margin:10px 0; background: #64748b;">Refresh List</button>
+    </div>
+    
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Roll Number</th>
+          <th>Due / Balance</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="allDuesList">
+        <tr><td colspan="3" style="text-align:center;">Loading records...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Detailed View Modal -->
+  <div class="modal" id="studentDetailModal">
+    <div class="modal-content">
+      <button class="close-btn" onclick="document.getElementById('studentDetailModal').classList.remove('active')">&times;</button>
+      <h2 style="text-align: left; margin-bottom: 5px;">Roll: <span id="modalRollTitle"></span></h2>
+      
+      <div id="checkDueValContainer" style="padding: 15px; border-radius: 8px; font-size: 20px; font-weight: bold; margin: 15px 0; text-align: center;">
+        <span id="checkDueValText"></span>
+      </div>
+
+      <div class="payment-box">
+        <h3>Receive Payment</h3>
+        <p style="font-size: 12px; color: #666;">If they pay more than the due amount, it will be saved as an Advance Balance.</p>
+        <input type="number" id="payAmount" placeholder="Amount Received (Tk)">
+        <button onclick="handlePay()" style="background: var(--success); margin-top: 10px;" id="payBtn">Confirm Payment</button>
+      </div>
+      
+      <h4 style="margin-top: 25px; text-align: left; color: #334155;">Payment History</h4>
+      <div style="max-height: 150px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <div id="historyList"></div>
+      </div>
+      
+      <h4 style="margin-top: 25px; text-align: left; color: #334155;">All Print History</h4>
+      <div style="max-height: 150px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <div id="recentPrintList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modern Floating Success Modal -->
+  <div class="modal" id="successModal" style="z-index: 80;">
+    <div class="modal-content" style="max-width: 380px; text-align: center; padding: 40px 30px;">
+      <div style="color: var(--success); margin-bottom: 20px; display: flex; justify-content: center;">
+        <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+      </div>
+      <h2 style="color: #0f172a; margin-bottom: 15px; font-size: 24px;">Payment Received!</h2>
+      <p id="successDetails" style="color: #475569; font-size: 15px; margin-bottom: 30px; line-height: 1.6;"></p>
+      <button onclick="document.getElementById('successModal').classList.remove('active')" style="background: var(--primary); border-radius: 8px; width: 100%; padding: 14px;">Done</button>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbw5Hc4IAYLrXy9_enCwnvXCbYCOPme1cwfBHZVQqTy4xOCJQ_2u4RkLY84WnY7IH_SU/exec';
+
+    let ADMIN_PIN = '';
+    let currentDueContext = 0;
+    let currentRollContext = '';
+    let allDuesData = [];
+
+    async function apiRequest(payload) {
+      payload.adminPin = ADMIN_PIN;
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          }
+        });
+        const resJson = await response.json();
+        if (resJson.success) return resJson.data;
+        throw new Error(resJson.error || 'Server error occurred');
+      } catch (err) {
+        throw new Error(err.message || 'Server Connection Failed');
+      }
+    }
+
+    async function login() {
+      ADMIN_PIN = document.getElementById('pinInput').value;
+      if (!ADMIN_PIN) ADMIN_PIN = '1234';
+      try {
+        await loadAllDues(); 
+        document.getElementById('loginOverlay').style.display = 'none';
+      } catch { 
+        document.getElementById('loginErr').style.display = 'block'; 
+      }
+    }
+
+    async function loadAllDues() {
+      try {
+        const dues = await apiRequest({ action: 'adminGetAllDues' });
+        allDuesData = Array.isArray(dues) ? dues : [];
+        renderDuesList(allDuesData);
+      } catch (err) {
+        document.getElementById('allDuesList').innerHTML = `<tr><td colspan="3" style="text-align:center; color:red;">Failed to load records.</td></tr>`;
+      }
+    }
+
+    function renderDuesList(duesArray) {
+      const tbody = document.getElementById('allDuesList');
+      if (!duesArray || duesArray.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">No records found.</td></tr>`;
+        return;
+      }
+      
+      tbody.innerHTML = duesArray.map(item => {
+        let badgeHtml = '';
+        if (item.due > 0) {
+            badgeHtml = `<span class="badge danger">Due: ${item.due} Tk</span>`;
+        } else if (item.due < 0) {
+            badgeHtml = `<span class="badge success">Balance: ${Math.abs(item.due)} Tk</span>`;
+        } else {
+            badgeHtml = `<span class="badge" style="background:#f1f5f9;">Settled</span>`;
+        }
+
+        return `
+          <tr>
+            <td><strong>${item.roll}</strong></td>
+            <td>${badgeHtml}</td>
+            <td><button class="btn-view" onclick="openStudent('${item.roll}')">View</button></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function searchRoll() {
+      const roll = document.getElementById('searchInput').value;
+      if(!/^\d{7}$/.test(roll)) return alert("Please enter a valid 7-digit roll number.");
+      openStudent(roll);
+    }
+
+    async function openStudent(roll) {
+      document.getElementById('modalRollTitle').innerText = roll;
+      
+      document.getElementById('checkDueValContainer').style.background = '#f1f5f9';
+      document.getElementById('checkDueValText').innerHTML = 'Loading records...';
+      document.getElementById('historyList').innerHTML = '';
+      document.getElementById('recentPrintList').innerHTML = '';
+      document.getElementById('payAmount').value = '';
+      
+      document.getElementById('studentDetailModal').classList.add('active');
+      
+      try {
+        const data = await apiRequest({ action: 'getCustomerData', roll: roll });
+        currentDueContext = parseFloat(data.due) || 0;
+        currentRollContext = roll;
+        
+        const dueContainer = document.getElementById('checkDueValContainer');
+        const dueText = document.getElementById('checkDueValText');
+        
+        if (currentDueContext > 0) {
+            dueContainer.style.background = '#fee2e2'; 
+            dueText.innerHTML = `Current Due: <span style="color:var(--danger)">${currentDueContext} Tk</span>`;
+        } else if (currentDueContext < 0) {
+            dueContainer.style.background = '#d1fae5'; 
+            dueText.innerHTML = `Advance Balance: <span style="color:var(--success)">${Math.abs(currentDueContext)} Tk</span>`;
+        } else {
+            dueContainer.style.background = '#f1f5f9'; 
+            dueText.innerHTML = `Settled: <span style="color:#475569">0 Tk</span>`;
+        }
+        
+        let payHtml = '<table class="history-table"><thead><tr><th>Date</th><th>Time</th><th>Paid Amount</th></tr></thead><tbody>';
+        if (!data.history || data.history.length === 0) {
+            payHtml += '<tr><td colspan="3" style="text-align:center;">No payment records found.</td></tr>';
+        } else {
+            data.history.forEach(h => {
+                payHtml += `<tr><td>${h.date}</td><td>${h.time}</td><td><strong>+${h.amount} Tk</strong></td></tr>`;
+            });
+        }
+        payHtml += '</tbody></table>';
+        document.getElementById('historyList').innerHTML = payHtml;
+          
+        let printHtml = '<table class="history-table"><thead><tr><th>Date</th><th>Time</th><th>Cost</th><th>Status</th></tr></thead><tbody>';
+        if (!data.recentPrints || data.recentPrints.length === 0) {
+            printHtml += '<tr><td colspan="4" style="text-align:center;">No print records found.</td></tr>';
+        } else {
+            data.recentPrints.forEach(p => {
+                const badge = p.status === 'Completed' ? '<span class="badge success">Completed</span>' : '<span class="badge pending">Pending</span>';
+                printHtml += `<tr><td>${p.date}</td><td>${p.time}</td><td>${p.amount} Tk</td><td>${badge}</td></tr>`;
+            });
+        }
+        printHtml += '</tbody></table>';
+        document.getElementById('recentPrintList').innerHTML = printHtml;
+          
+      } catch (err) { 
+        alert("Error: " + err.message); 
+        document.getElementById('studentDetailModal').classList.remove('active');
+      }
+    }
+
+    async function handlePay() {
+      const amt = parseFloat(document.getElementById('payAmount').value);
+      if(!amt || amt <= 0) return alert("Please enter a valid amount greater than 0.");
+      
+      const btn = document.getElementById('payBtn');
+      btn.innerText = "Processing...";
+      btn.disabled = true;
+
+      try {
+        const data = await apiRequest({ action: 'adminReceivePayment', roll: currentRollContext, amount: amt });
+        
+        let msg = "";
+        if (data.remainingDue > 0) msg = `Remaining Due: <strong style="color:var(--danger)">${data.remainingDue} Tk</strong>`;
+        else if (data.remainingDue < 0) msg = `New Advance Balance: <strong style="color:var(--success)">${Math.abs(data.remainingDue)} Tk</strong>`;
+        else msg = `<strong style="color:#475569">Account settled entirely.</strong>`;
+        
+        document.getElementById('successDetails').innerHTML = `Amount Received: <strong>${amt} Tk</strong><br><br>${msg}`;
+        document.getElementById('successModal').classList.add('active');
+        
+        await openStudent(currentRollContext);
+        loadAllDues();
+      } catch (err) { 
+        alert("Error: " + err.message); 
+      } finally {
+        btn.innerText = "Confirm Payment";
+        btn.disabled = false;
+        document.getElementById('payAmount').value = '';
+      }
+    }
+  </script>
+</body>
+</html>
