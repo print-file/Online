@@ -458,7 +458,7 @@
         
         if (dueAmt > 0) { dueContainer.style.background = '#fee2e2'; dueText.innerHTML = `Total Due: <span style="color:var(--danger)">${dueAmt} Tk</span>`; } 
         else if (dueAmt < 0) { dueContainer.style.background = '#d1fae5'; dueText.innerHTML = `Balance: <span style="color:var(--success)">${Math.abs(dueAmt)} Tk</span>`; } 
-        else { dueContainer.style.background = '#f1f5f9'; dueText.innerHTML = `Settled: <span style="color:#475569">0 Tk</span>`; }
+        else { dueContainer.style.background = '#f1f5f9'; dueText.innerHTML = `Balance: <span style="color:#475569">0 Tk</span>`; }
         
         let payHtml = '<table class="history-table"><thead><tr><th>Date</th><th>Time</th><th>Paid Amount</th></tr></thead><tbody>';
         if (!data.history || data.history.length === 0) { payHtml += '<tr><td colspan="3" style="text-align:center; padding: 20px; color:#64748b;">No payment records found.</td></tr>'; } 
