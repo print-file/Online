@@ -434,7 +434,7 @@
         const { base64, ...jobMeta } = currentJob;
         await apiRequest({ action: 'submitPrintJob', ...jobMeta });
         
-        fill.style.width = `100%`; textElement.innerText = "Upload Completed!"; textElement.style.color = "var(--success)";
+        fill.style.width = `100%`; textElement.innerText = ""; textElement.style.color = "var(--success)";
         showToast('File uploaded successfully!');
         setTimeout(() => { closeModal('confirmModal'); closeModal('printModal'); }, 1500);
       } catch (err) {
