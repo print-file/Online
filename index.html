@@ -123,8 +123,6 @@
         </div>
         <h3>Print Document</h3>
         <p>Upload PDFs and get instant cost estimates.</p>
-        
-        <!-- INITIAL STATE IS DISABLED UNTIL API CONFIRMS STATUS -->
         <button id="startPrintBtn" onclick="openModal('printModal')" disabled>Connecting...</button>
       </div>
 
@@ -152,13 +150,11 @@
       
       <div class="form-group">
         <label>Document File</label>
-        <!-- Automatically triggers analysis when file is changed if mode is selected -->
         <input type="file" id="pdfInput" accept="application/pdf" onchange="handleFileChange()">
       </div>
       
       <div class="form-group">
         <label>Select Print Mode</label>
-        <!-- Automatically triggers analysis and pricing upon selection -->
         <select id="modeInput" onchange="handleModeChange()">
           <option value="" disabled selected>Not Selected</option>
           <option value="color">Color</option>
@@ -181,7 +177,6 @@
         <label>Page Breakdown</label>
         <div class="preview-grid" id="thumbnailGrid" style="max-height: 250px; overflow-y: auto; padding: 5px;"></div>
         
-        <!-- FIXED STICKY BUTTON: STAYS ON SCREEN WITHOUT SCROLLING -->
         <button id="submitBtn" onclick="submitOrder()" style="margin-top: 20px; width: 100%; position: sticky; bottom: 0; z-index: 20; box-shadow: 0 -4px 15px rgba(0,0,0,0.1), 0 4px 14px rgba(37,99,235,0.35);">Confirm & Upload</button>
       </div>
     </div>
@@ -244,14 +239,14 @@
   <div class="toast" id="toast">Message</div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzNK9hZYz14be5QilCpUNEz-P0dqEbRg6hyPvxQ9wt6QPQnuyciRGjlDWwEQNj_v7Tz/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycby62B_ehwFbzrmm1Szw9UkFSxgVDH_HJ274gV3y66p5CCYY-dE0JgJwEI_KI_JMcZzQ/exec';
 
     const CONFIG = {
       pricing: {
-        bw: { Normal: 2.5, Medium: 2.5, High: 3 },
-        color: { Normal: 3, Medium: 3, High: 3.5 }
+        bw: { Blank: 0, Normal: 2.5, Medium: 2.5, High: 3 },
+        color: { Blank: 0, Normal: 3, Medium: 3, High: 3.5 }
       },
-      thresholds: { medium: 0.10, high: 0.30 } 
+      thresholds: { blank: 0.0005, medium: 0.10, high: 0.30 } 
     };
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
@@ -312,7 +307,6 @@
       cachedPagesAnalysis = null;
     }
 
-    // Triggered automatically when user selects a new file
     function handleFileChange() {
       cachedPagesAnalysis = null;
       document.getElementById('previewArea').style.display = 'none';
@@ -323,7 +317,6 @@
       }
     }
 
-    // Triggered automatically when mode changes
     function handleModeChange() {
       const mode = document.getElementById('modeInput').value;
       if (!mode) return;
@@ -342,22 +335,35 @@
 
     function recalculateEstimate(mode) {
       let totalCost = 0;
+      let printablePages = 0;
+      let blankPages = 0;
       const pageDetails = [];
       const grid = document.getElementById('thumbnailGrid');
       grid.innerHTML = '';
 
       cachedPagesAnalysis.forEach(p => {
-        const cost = CONFIG.pricing[mode][p.intensity];
+        const cost = CONFIG.pricing[mode][p.intensity] || 0;
         totalCost += cost;
+        if (p.intensity === 'Blank') {
+          blankPages++;
+        } else {
+          printablePages++;
+        }
         pageDetails.push({ page: p.page, intensity: p.intensity, cost: cost });
+
+        const isBlank = p.intensity === 'Blank';
+        const badgeColor = isBlank ? '#059669' : '#64748b';
+        const costDisplay = isBlank ? '<strong style="color:#059669">0 Tk (Free)</strong>' : `<strong style="color:var(--primary)">${cost} Tk</strong>`;
 
         const thumbDiv = document.createElement('div');
         thumbDiv.className = 'page-thumb';
-        thumbDiv.innerHTML = `<img src="${p.imgData}"><br><strong>P${p.page}</strong><br><span style="color:#64748b">${p.intensity}</span><br><strong style="color:var(--primary)">${cost} Tk</strong>`;
+        thumbDiv.innerHTML = `<img src="${p.imgData}"><br><strong>P${p.page}</strong><br><span style="color:${badgeColor}; font-weight:600;">${p.intensity}</span><br>${costDisplay}`;
         grid.appendChild(thumbDiv);
       });
 
       const roundedTotal = Math.round(totalCost);
+      const totalCount = cachedPagesAnalysis.length;
+      document.getElementById('summaryPages').innerText = blankPages > 0 ? `${totalCount} (${printablePages} Printable, ${blankPages} Blank)` : `${totalCount}`;
       document.getElementById('summaryModeDisplay').innerText = mode === 'bw' ? 'Black & White' : 'Color';
       document.getElementById('summaryCost').innerText = roundedTotal;
 
@@ -409,9 +415,16 @@
             }
             
             const coverage = darkPixels / (canvas.width * canvas.height);
+            
+            // BLANK PAGE DETECTION: ০.০৫% বা তার কম কালি থাকলে ব্ল্যাঙ্ক
             let intensity = 'Normal';
-            if (coverage > CONFIG.thresholds.high) intensity = 'High';
-            else if (coverage > CONFIG.thresholds.medium) intensity = 'Medium';
+            if (coverage <= CONFIG.thresholds.blank) {
+              intensity = 'Blank';
+            } else if (coverage > CONFIG.thresholds.high) {
+              intensity = 'High';
+            } else if (coverage > CONFIG.thresholds.medium) {
+              intensity = 'Medium';
+            }
             
             cachedPagesAnalysis.push({
               page: i,
@@ -420,7 +433,6 @@
             });
           }
 
-          document.getElementById('summaryPages').innerText = numPages;
           recalculateEstimate(mode);
 
           document.getElementById('processingArea').style.display = 'none';
@@ -434,7 +446,7 @@
               fileName: file.name, 
               mode: mode,
               totalPages: numPages, 
-              pageDetails: cachedPagesAnalysis.map(p => ({ page: p.page, intensity: p.intensity, cost: CONFIG.pricing[mode][p.intensity] })),
+              pageDetails: cachedPagesAnalysis.map(p => ({ page: p.page, intensity: p.intensity, cost: CONFIG.pricing[mode][p.intensity] || 0 })),
               totalAmount: parseInt(document.getElementById('summaryCost').innerText) || 0,
               base64: e.target.result.split(',')[1]
             };
@@ -487,7 +499,7 @@
           await apiRequest({ action: 'uploadChunk', subId: currentJob.subId, chunkIndex: i, chunkBase64: chunk });
           const percent = Math.round(((i + 1) / totalChunks) * 85); 
           fill.style.width = percent + '%';
-          textElement.innerText = "Uploading...";
+          textElement.innerText = `Uploading...: ${percent}%`;
         }
         textElement.innerText = "Uploading...";
         const { base64, ...jobMeta } = currentJob;
