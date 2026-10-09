@@ -54,8 +54,31 @@
     .modal-content { background: #ffffff; width: 100%; max-width: 550px; padding: 35px; border-radius: 20px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: translateY(20px) scale(0.95); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
     .modal.active .modal-content { transform: translateY(0) scale(1); }
 
-    .close-btn { position: absolute; top: 15px; right: 15px; background: #f1f5f9; color: #64748b; width: 34px; height: 34px; border-radius: 50%; font-size: 24px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; transition: all 0.2s ease; z-index: 10; }
-    .close-btn:hover { background: #fee2e2; color: var(--danger); }
+    /* MODIFIED: Floating Sticky Close Button */
+    .close-btn { 
+      position: sticky; 
+      top: 10px; 
+      float: right; 
+      margin-right: -10px; 
+      margin-top: -10px; 
+      margin-bottom: -20px; 
+      background: #ffffff; 
+      color: #64748b; 
+      width: 36px; 
+      height: 36px; 
+      border-radius: 50%; 
+      font-size: 24px; 
+      border: 1px solid #e2e8f0; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      line-height: 1; 
+      transition: all 0.2s ease;
+      z-index: 100;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    .close-btn:hover { background: #fee2e2; color: var(--danger); border-color: #f87171;}
 
     .form-group { margin-bottom: 20px; text-align: left; }
     label { display: block; margin-bottom: 8px; font-weight: 600; color: #334155; font-size: 14px;}
