@@ -428,9 +428,9 @@
           await apiRequest({ action: 'uploadChunk', subId: currentJob.subId, chunkIndex: i, chunkBase64: chunk });
           const percent = Math.round(((i + 1) / totalChunks) * 85); 
           fill.style.width = percent + '%';
-          textElement.innerText = `Uploading chunks: ${percent}%`;
+          textElement.innerText = `Uploading...: ${percent}%`;
         }
-        textElement.innerText = "Finalizing upload...";
+        textElement.innerText = "Uploading...";
         const { base64, ...jobMeta } = currentJob;
         await apiRequest({ action: 'submitPrintJob', ...jobMeta });
         
