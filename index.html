@@ -70,9 +70,95 @@
     .summary-box { background: #f8fafc; padding: 20px; border-radius: 16px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
     .summary-box p { display: flex; justify-content: space-between; margin-bottom: 8px; color: #475569;}
     .summary-box .total-row { font-size: 1.25rem; font-weight: 700; color: #0f172a; border-top: 2px dashed #cbd5e1; padding-top: 10px; margin-top: 10px;}
-    .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; margin-top: 20px; }
+    
+    .file-group { margin-bottom: 18px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; }
+    .file-group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13px; font-weight: 600; color: #0f172a; gap: 10px; }
+    .file-group-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 12px; }
     .page-thumb { border: 1px solid #e2e8f0; padding: 8px; text-align: center; border-radius: 10px; font-size: 12px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.02);}
     .page-thumb img { width: 100%; height: auto; border: 1px solid #f1f5f9; border-radius: 6px; margin-bottom: 8px; }
+
+    /* Contact & Payment Info Cards */
+    .info-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 20px 18px;
+      margin-top: 18px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+      text-align: center;
+    }
+    .info-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .info-card-header h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f172a;
+      margin: 0;
+    }
+    .icon-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .icon-circle.wa { background: #dcfce7; }
+    .icon-circle.bkash { background: #fce7f3; }
+
+    .info-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      background: #ffffff;
+      text-decoration: none;
+      color: #1e293b;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .info-pill + .info-pill { margin-top: 10px; }
+    .info-pill:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+    }
+    .info-pill-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+    }
+    .info-pill-sub {
+      display: block;
+      font-size: 12px;
+      font-weight: 400;
+      color: #64748b;
+    }
+    .pill-chevron {
+      color: #94a3b8;
+      font-size: 18px;
+      font-weight: 500;
+    }
+    .copy-tag {
+      font-size: 12px;
+      font-weight: 600;
+      color: #e2136e;
+      background: #fce7f3;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
 
     .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; background: white;}
     .history-table th, .history-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
@@ -149,8 +235,8 @@
       </div>
       
       <div class="form-group">
-        <label>Document File</label>
-        <input type="file" id="pdfInput" accept="application/pdf" onchange="handleFileChange()">
+        <label>Document Files (Multiple PDFs supported)</label>
+        <input type="file" id="pdfInput" accept="application/pdf" multiple onchange="handleFileChange()">
       </div>
       
       <div class="form-group">
@@ -169,15 +255,84 @@
 
       <div id="previewArea" style="display:none; margin-top: 25px;">
         <div class="summary-box">
+          <p><span>Total Files:</span> <span id="summaryFiles" style="font-weight:600;">0</span></p>
           <p><span>Total Pages:</span> <span id="summaryPages" style="font-weight:600;">0</span></p>
           <p><span>Print Mode:</span> <span id="summaryModeDisplay" style="font-weight:600; text-transform: capitalize;">-</span></p>
           <p class="total-row"><span>Total Cost:</span> <span><span id="summaryCost">0</span> Tk</span></p>
         </div>
         
         <label>Page Breakdown</label>
-        <div class="preview-grid" id="thumbnailGrid" style="max-height: 250px; overflow-y: auto; padding: 5px;"></div>
+        <div id="thumbnailContainer" style="max-height: 280px; overflow-y: auto; padding: 5px;"></div>
         
-        <button id="submitBtn" onclick="submitOrder()" style="margin-top: 20px; width: 100%; position: sticky; bottom: 0; z-index: 20; box-shadow: 0 -4px 15px rgba(0,0,0,0.1), 0 4px 14px rgba(37,99,235,0.35);">Confirm & Upload</button>
+        <button id="submitBtn" onclick="submitOrder()" style="margin-top: 20px; width: 100%; box-shadow: 0 4px 14px rgba(37,99,235,0.35);">Confirm & Upload</button>
+
+        <!-- WhatsApp Contact Card -->
+        <div class="info-card">
+          <div class="info-card-header">
+            <div class="icon-circle wa">
+              <svg width="22" height="22" viewBox="0 0 32 32" fill="#25D366">
+                <path d="M16 3C8.82 3 3 8.82 3 16c0 2.31.61 4.56 1.76 6.54L3 29l6.65-1.74A12.93 12.93 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm7.58 18.36c-.32.9-1.86 1.72-2.57 1.83-.66.1-1.5.14-2.42-.15-.56-.18-1.28-.42-2.2-.82-3.87-1.67-6.4-5.58-6.59-5.84-.19-.26-1.57-2.09-1.57-3.99 0-1.9.99-2.83 1.34-3.22.35-.39.77-.49 1.03-.49.26 0 .51.01.74.02.24.01.56-.09.88.67.32.77 1.09 2.66 1.19 2.85.1.19.16.42.03.68-.13.26-.19.42-.39.64-.19.22-.41.5-.58.67-.19.19-.4.4-.17.79.23.39 1.01 1.67 2.17 2.7 1.49 1.33 2.75 1.74 3.14 1.94.39.19.62.16.85-.1.23-.26.98-1.14 1.24-1.53.26-.39.52-.32.88-.19.36.13 2.27 1.07 2.66 1.27.39.19.65.29.74.45.1.16.1.93-.22 1.83z"/>
+              </svg>
+            </div>
+            <h4>Contact us on WhatsApp</h4>
+          </div>
+          <a href="https://wa.me/8801521779357" target="_blank" rel="noopener noreferrer" class="info-pill">
+            <span class="info-pill-left">
+              <svg width="22" height="22" viewBox="0 0 32 32" fill="#25D366">
+                <path d="M16 3C8.82 3 3 8.82 3 16c0 2.31.61 4.56 1.76 6.54L3 29l6.65-1.74A12.93 12.93 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm7.58 18.36c-.32.9-1.86 1.72-2.57 1.83-.66.1-1.5.14-2.42-.15-.56-.18-1.28-.42-2.2-.82-3.87-1.67-6.4-5.58-6.59-5.84-.19-.26-1.57-2.09-1.57-3.99 0-1.9.99-2.83 1.34-3.22.35-.39.77-.49 1.03-.49.26 0 .51.01.74.02.24.01.56-.09.88.67.32.77 1.09 2.66 1.19 2.85.1.19.16.42.03.68-.13.26-.19.42-.39.64-.19.22-.41.5-.58.67-.19.19-.4.4-.17.79.23.39 1.01 1.67 2.17 2.7 1.49 1.33 2.75 1.74 3.14 1.94.39.19.62.16.85-.1.23-.26.98-1.14 1.24-1.53.26-.39.52-.32.88-.19.36.13 2.27 1.07 2.66 1.27.39.19.65.29.74.45.1.16.1.93-.22 1.83z"/>
+              </svg>
+              <span>01521779357</span>
+            </span>
+            <span class="pill-chevron">&#8250;</span>
+          </a>
+        </div>
+
+        <!-- Payment Method Card -->
+        <div class="info-card">
+          <div class="info-card-header">
+            <div class="icon-circle bkash">
+              <svg width="24" height="24" viewBox="0 0 64 64" fill="none">
+                <path d="M12 16L33 22L27 42L12 16Z" fill="#E2136E"/>
+                <path d="M33 22L54 14L41 34L33 22Z" fill="#D11063"/>
+                <path d="M27 42L41 34L35 50L27 42Z" fill="#E2136E"/>
+                <path d="M41 34L54 14L49 36L41 34Z" fill="#B50D55"/>
+                <path d="M12 16L22 33L14 38L12 16Z" fill="#C40F5D"/>
+              </svg>
+            </div>
+            <h4>Payment Method</h4>
+          </div>
+
+          <div class="info-pill" onclick="copyText('01521779357', 'bKash number copied!')">
+            <span class="info-pill-left">
+              <svg width="24" height="24" viewBox="0 0 64 64" fill="none">
+                <path d="M12 16L33 22L27 42L12 16Z" fill="#E2136E"/>
+                <path d="M33 22L54 14L41 34L33 22Z" fill="#D11063"/>
+                <path d="M27 42L41 34L35 50L27 42Z" fill="#E2136E"/>
+                <path d="M41 34L54 14L49 36L41 34Z" fill="#B50D55"/>
+                <path d="M12 16L22 33L14 38L12 16Z" fill="#C40F5D"/>
+              </svg>
+              <span>
+                01521779357
+                <span class="info-pill-sub">bKash (Send Money)</span>
+              </span>
+            </span>
+            <span class="copy-tag">Copy</span>
+          </div>
+
+          <div class="info-pill" style="cursor: default;">
+            <span class="info-pill-left">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                <circle cx="12" cy="12" r="2"></circle>
+                <path d="M6 12h.01M18 12h.01"></path>
+              </svg>
+              <span>
+                Hand Cash
+                <span class="info-pill-sub">Pay directly on pickup</span>
+              </span>
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -188,6 +343,7 @@
       <button class="close-btn" onclick="closeModal('confirmModal')">&times;</button>
       <div class="confirm-box" id="confirmBoxOptions">
         <h2 style="margin-top:10px;">Confirm Submission</h2>
+        <p id="confirmFileCount" style="margin-bottom: 5px;"></p>
         <div class="price"><span id="confirmTotal">0</span> Tk</div>
         <div class="confirm-btn-group">
           <button class="btn-cancel" onclick="closeModal('confirmModal')">Cancel</button>
@@ -197,7 +353,7 @@
       
       <div id="uploadProgressContainer" style="display:none; text-align: center; padding: 25px 0;">
         <div class="spinner"></div>
-        <p id="uploadPercentText" style="font-weight: 600; color: var(--primary); margin-top: 20px; font-size: 1.1rem;">Uploading...</p>
+        <p id="uploadPercentText" style="font-weight: 600; color: var(--primary); margin-top: 20px; font-size: 1.05rem;">Uploading...</p>
         <div class="progress-bar" style="display:block"><div class="progress-fill" id="uploadFill"></div></div>
       </div>
     </div>
@@ -250,8 +406,7 @@
     };
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-    let currentJob = null; 
-    let cachedPagesAnalysis = null; 
+    let cachedJobs = [];
 
     window.addEventListener('DOMContentLoaded', async () => {
       const btn = document.getElementById('startPrintBtn');
@@ -290,6 +445,14 @@
       setTimeout(() => t.style.display = 'none', 3000);
     }
 
+    function copyText(text, msg) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(msg);
+      }).catch(() => {
+        showToast('Number: ' + text);
+      });
+    }
+
     function resetForms() {
       document.getElementById('rollInput').value = '';
       document.getElementById('pdfInput').value = '';
@@ -301,19 +464,18 @@
       document.getElementById('confirmBoxOptions').style.display = 'block';
       document.getElementById('uploadProgressContainer').style.display = 'none';
       document.getElementById('uploadFill').style.width = '0%';
+      document.getElementById('uploadPercentText').style.color = 'var(--primary)';
       document.getElementById('dueResults').style.display = 'none';
       
-      currentJob = null;
-      cachedPagesAnalysis = null;
+      cachedJobs = [];
     }
 
     function handleFileChange() {
-      cachedPagesAnalysis = null;
+      cachedJobs = [];
       document.getElementById('previewArea').style.display = 'none';
-      currentJob = null;
       const mode = document.getElementById('modeInput').value;
       if (mode) {
-        processPDF();
+        processPDFs();
       }
     }
 
@@ -321,102 +483,152 @@
       const mode = document.getElementById('modeInput').value;
       if (!mode) return;
 
-      if (cachedPagesAnalysis && cachedPagesAnalysis.length > 0) {
+      if (cachedJobs.length > 0) {
         recalculateEstimate(mode);
       } else {
         const fileInput = document.getElementById('pdfInput');
-        if (fileInput.files && fileInput.files[0]) {
-          processPDF();
+        if (fileInput.files && fileInput.files.length > 0) {
+          processPDFs();
         } else {
-          showToast('Please select a PDF file first', true);
+          showToast('Please select at least one PDF file first', true);
         }
       }
+    }
+
+    function readFileAsArrayBuffer(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function readFileAsBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
     }
 
     function recalculateEstimate(mode) {
-      let totalCost = 0;
-      let printablePages = 0;
-      let blankPages = 0;
-      const pageDetails = [];
-      const grid = document.getElementById('thumbnailGrid');
-      grid.innerHTML = '';
+      let grandTotalCost = 0;
+      let totalPagesCount = 0;
+      let totalPrintable = 0;
+      let totalBlank = 0;
 
-      cachedPagesAnalysis.forEach(p => {
-        const cost = CONFIG.pricing[mode][p.intensity] || 0;
-        totalCost += cost;
-        if (p.intensity === 'Blank') {
-          blankPages++;
-        } else {
-          printablePages++;
-        }
-        pageDetails.push({ page: p.page, intensity: p.intensity, cost: cost });
+      const container = document.getElementById('thumbnailContainer');
+      container.innerHTML = '';
 
-        const isBlank = p.intensity === 'Blank';
-        const badgeColor = isBlank ? '#059669' : '#64748b';
-        const costDisplay = isBlank ? '<strong style="color:#059669">0 Tk (Free)</strong>' : `<strong style="color:var(--primary)">${cost} Tk</strong>`;
+      cachedJobs.forEach((job, idx) => {
+        let fileCost = 0;
+        const pageDetails = [];
 
-        const thumbDiv = document.createElement('div');
-        thumbDiv.className = 'page-thumb';
-        thumbDiv.innerHTML = `<img src="${p.imgData}"><br><strong>P${p.page}</strong><br><span style="color:${badgeColor}; font-weight:600;">${p.intensity}</span><br>${costDisplay}`;
-        grid.appendChild(thumbDiv);
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'file-group';
+
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'preview-grid';
+
+        job.pagesAnalysis.forEach(p => {
+          const cost = CONFIG.pricing[mode][p.intensity] || 0;
+          fileCost += cost;
+          totalPagesCount++;
+          if (p.intensity === 'Blank') totalBlank++;
+          else totalPrintable++;
+
+          pageDetails.push({ page: p.page, intensity: p.intensity, cost: cost });
+
+          const isBlank = p.intensity === 'Blank';
+          const badgeColor = isBlank ? '#059669' : '#64748b';
+          const costDisplay = isBlank
+            ? '<strong style="color:#059669">0 Tk (Free)</strong>'
+            : `<strong style="color:var(--primary)">${cost} Tk</strong>`;
+
+          const thumbDiv = document.createElement('div');
+          thumbDiv.className = 'page-thumb';
+          thumbDiv.innerHTML = `<img src="${p.imgData}"><br><strong>P${p.page}</strong><br><span style="color:${badgeColor}; font-weight:600;">${p.intensity}</span><br>${costDisplay}`;
+          gridDiv.appendChild(thumbDiv);
+        });
+
+        const roundedFileCost = Math.round(fileCost);
+        grandTotalCost += roundedFileCost;
+
+        job.mode = mode;
+        job.pageDetails = pageDetails;
+        job.totalAmount = roundedFileCost;
+
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'file-group-header';
+        headerDiv.innerHTML = `
+          <span class="file-group-name" title="${job.fileName}">${idx + 1}. ${job.fileName}</span>
+          <span style="white-space:nowrap; color:var(--primary);">${roundedFileCost} Tk</span>
+        `;
+
+        groupDiv.appendChild(headerDiv);
+        groupDiv.appendChild(gridDiv);
+        container.appendChild(groupDiv);
       });
 
-      const roundedTotal = Math.round(totalCost);
-      const totalCount = cachedPagesAnalysis.length;
-      document.getElementById('summaryPages').innerText = blankPages > 0 ? `${totalCount} (${printablePages} Printable, ${blankPages} Blank)` : `${totalCount}`;
+      document.getElementById('summaryFiles').innerText = cachedJobs.length;
+      document.getElementById('summaryPages').innerText = totalBlank > 0
+        ? `${totalPagesCount} (${totalPrintable} Printable, ${totalBlank} Blank)`
+        : `${totalPagesCount}`;
       document.getElementById('summaryModeDisplay').innerText = mode === 'bw' ? 'Black & White' : 'Color';
-      document.getElementById('summaryCost').innerText = roundedTotal;
-
-      if (currentJob) {
-        currentJob.mode = mode;
-        currentJob.pageDetails = pageDetails;
-        currentJob.totalAmount = roundedTotal;
-      }
+      document.getElementById('summaryCost').innerText = grandTotalCost;
     }
 
-    async function processPDF() {
+    async function processPDFs() {
       const fileInput = document.getElementById('pdfInput');
       const mode = document.getElementById('modeInput').value;
+      const files = Array.from(fileInput.files || []);
 
-      if (!fileInput.files[0] || fileInput.files[0].type !== 'application/pdf') {
-        return showToast('Please select a valid PDF file', true);
-      }
+      if (files.length === 0) return showToast('Please select at least one PDF file', true);
       if (!mode) return;
-      
-      const file = fileInput.files[0];
-      if (file.size > 100 * 1024 * 1024) return showToast('File is too large (Max 100MB)', true);
+
+      for (const f of files) {
+        if (f.type !== 'application/pdf') return showToast(`Invalid file: ${f.name} (PDF only)`, true);
+        if (f.size > 100 * 1024 * 1024) return showToast(`${f.name} is too large (Max 100MB)`, true);
+      }
 
       document.getElementById('previewArea').style.display = 'none';
       document.getElementById('processingArea').style.display = 'block';
-      
-      const fileReader = new FileReader();
-      fileReader.onload = async function() {
-        try {
-          const typedarray = new Uint8Array(this.result);
+      cachedJobs = [];
+
+      try {
+        for (let fIdx = 0; fIdx < files.length; fIdx++) {
+          const file = files[fIdx];
+          document.getElementById('processStatus').innerText = `Loading file ${fIdx + 1} of ${files.length}...`;
+
+          const arrayBuffer = await readFileAsArrayBuffer(file);
+          const typedarray = new Uint8Array(arrayBuffer);
           const pdf = await pdfjsLib.getDocument(typedarray).promise;
           const numPages = pdf.numPages;
-          
-          cachedPagesAnalysis = [];
+
+          const pagesAnalysis = [];
 
           for (let i = 1; i <= numPages; i++) {
-            document.getElementById('processStatus').innerText = `Analyzing page ${i} of ${numPages}...`;
+            document.getElementById('processStatus').innerText =
+              `File ${fIdx + 1}/${files.length}: Analyzing page ${i} of ${numPages}...`;
             const page = await pdf.getPage(i);
-            const viewport = page.getViewport({ scale: 0.2 }); 
+            const viewport = page.getViewport({ scale: 0.2 });
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = viewport.width; canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
             await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-            
+
             const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
             let darkPixels = 0;
-            for(let j=0; j<imgData.length; j+=4) {
-              const luminance = 0.299*imgData[j] + 0.587*imgData[j+1] + 0.114*imgData[j+2];
-              if(luminance < 230) darkPixels++; 
+            for (let j = 0; j < imgData.length; j += 4) {
+              const luminance = 0.299 * imgData[j] + 0.587 * imgData[j + 1] + 0.114 * imgData[j + 2];
+              if (luminance < 230) darkPixels++;
             }
-            
+
             const coverage = darkPixels / (canvas.width * canvas.height);
-            
-            // BLANK PAGE DETECTION: ০.০৫% বা তার কম কালি থাকলে ব্ল্যাঙ্ক
+
             let intensity = 'Normal';
             if (coverage <= CONFIG.thresholds.blank) {
               intensity = 'Blank';
@@ -425,41 +637,36 @@
             } else if (coverage > CONFIG.thresholds.medium) {
               intensity = 'Medium';
             }
-            
-            cachedPagesAnalysis.push({
+
+            pagesAnalysis.push({
               page: i,
               intensity: intensity,
               imgData: canvas.toDataURL('image/jpeg', 0.5)
             });
           }
 
-          recalculateEstimate(mode);
-
-          document.getElementById('processingArea').style.display = 'none';
-          document.getElementById('previewArea').style.display = 'block';
-          
-          const b64Reader = new FileReader();
-          b64Reader.onload = (e) => {
-            currentJob = {
-              subId: crypto.randomUUID(), 
-              roll: document.getElementById('rollInput').value, 
-              fileName: file.name, 
-              mode: mode,
-              totalPages: numPages, 
-              pageDetails: cachedPagesAnalysis.map(p => ({ page: p.page, intensity: p.intensity, cost: CONFIG.pricing[mode][p.intensity] || 0 })),
-              totalAmount: parseInt(document.getElementById('summaryCost').innerText) || 0,
-              base64: e.target.result.split(',')[1]
-            };
-          };
-          b64Reader.readAsDataURL(file);
-
-        } catch (err) {
-          console.error(err); 
-          showToast('Error parsing PDF', true);
-          document.getElementById('processingArea').style.display = 'none';
+          cachedJobs.push({
+            subId: crypto.randomUUID(),
+            file: file,
+            fileName: file.name,
+            mode: mode,
+            totalPages: numPages,
+            pagesAnalysis: pagesAnalysis,
+            pageDetails: [],
+            totalAmount: 0
+          });
         }
-      };
-      fileReader.readAsArrayBuffer(file);
+
+        recalculateEstimate(mode);
+        document.getElementById('processingArea').style.display = 'none';
+        document.getElementById('previewArea').style.display = 'block';
+
+      } catch (err) {
+        console.error(err);
+        showToast('Error parsing one of the PDFs', true);
+        document.getElementById('processingArea').style.display = 'none';
+        cachedJobs = [];
+      }
     }
 
     async function apiRequest(payload) {
@@ -475,13 +682,17 @@
     }
 
     function submitOrder() {
-      if(!currentJob) return;
+      if (cachedJobs.length === 0) return;
       const roll = document.getElementById('rollInput').value;
       if (!/^\d{7}$/.test(roll)) return showToast('Please enter a 7-digit roll number', true);
-      currentJob.roll = roll;
+
+      const grandTotal = cachedJobs.reduce((sum, j) => sum + j.totalAmount, 0);
+      cachedJobs.forEach(j => j.roll = roll);
 
       document.getElementById('submitBtn').disabled = true;
-      document.getElementById('confirmTotal').innerText = currentJob.totalAmount;
+      document.getElementById('confirmFileCount').innerText =
+        cachedJobs.length > 1 ? `${cachedJobs.length} PDF files selected` : `1 PDF file selected`;
+      document.getElementById('confirmTotal').innerText = grandTotal;
       openModal('confirmModal');
     }
 
@@ -490,28 +701,65 @@
       document.getElementById('uploadProgressContainer').style.display = 'block';
       const textElement = document.getElementById('uploadPercentText');
       const fill = document.getElementById('uploadFill');
-      const CHUNK_SIZE = 1024 * 1024 * 3; 
-      const totalChunks = Math.ceil(currentJob.base64.length / CHUNK_SIZE);
-      
+      textElement.style.color = 'var(--primary)';
+
+      const CHUNK_SIZE = 1024 * 1024 * 3;
+      const totalFiles = cachedJobs.length;
+
       try {
-        for (let i = 0; i < totalChunks; i++) {
-          const chunk = currentJob.base64.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-          await apiRequest({ action: 'uploadChunk', subId: currentJob.subId, chunkIndex: i, chunkBase64: chunk });
-          const percent = Math.round(((i + 1) / totalChunks) * 85); 
-          fill.style.width = percent + '%';
-          textElement.innerText = `Uploading...: ${percent}%`;
+        for (let fIdx = 0; fIdx < totalFiles; fIdx++) {
+          const job = cachedJobs[fIdx];
+          textElement.innerText = `Preparing file ${fIdx + 1} of ${totalFiles}...`;
+
+          const base64 = await readFileAsBase64(job.file);
+          const totalChunks = Math.ceil(base64.length / CHUNK_SIZE);
+
+          for (let i = 0; i < totalChunks; i++) {
+            const chunk = base64.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+            await apiRequest({
+              action: 'uploadChunk',
+              subId: job.subId,
+              chunkIndex: i,
+              chunkBase64: chunk
+            });
+
+            const fileProgress = ((i + 1) / totalChunks) * 0.85;
+            const overallPercent = Math.round(((fIdx + fileProgress) / totalFiles) * 100);
+            fill.style.width = overallPercent + '%';
+            textElement.innerText = `Uploading file ${fIdx + 1}/${totalFiles}: ${overallPercent}%`;
+          }
+
+          textElement.innerText = `Finalizing file ${fIdx + 1}/${totalFiles}...`;
+          await apiRequest({
+            action: 'submitPrintJob',
+            subId: job.subId,
+            roll: job.roll,
+            fileName: job.fileName,
+            mode: job.mode,
+            totalPages: job.totalPages,
+            pageDetails: job.pageDetails,
+            totalAmount: job.totalAmount
+          });
+
+          const donePercent = Math.round(((fIdx + 1) / totalFiles) * 100);
+          fill.style.width = donePercent + '%';
         }
-        textElement.innerText = "Uploading...";
-        const { base64, ...jobMeta } = currentJob;
-        await apiRequest({ action: 'submitPrintJob', ...jobMeta });
-        
-        fill.style.width = `100%`; textElement.innerText = ""; textElement.style.color = "var(--success)";
-        showToast('File uploaded successfully!');
+
+        fill.style.width = '100%';
+        textElement.innerText = 'All files uploaded!';
+        textElement.style.color = 'var(--success)';
+        showToast(`${totalFiles} file(s) uploaded successfully!`);
         setTimeout(() => { closeModal('confirmModal'); closeModal('printModal'); }, 1500);
+
       } catch (err) {
-        showToast(err.message, true); document.getElementById('submitBtn').disabled = false;
-        textElement.innerText = 'Upload Failed'; textElement.style.color = "var(--danger)";
-        setTimeout(() => { document.getElementById('confirmBoxOptions').style.display = 'block'; document.getElementById('uploadProgressContainer').style.display = 'none'; }, 3000);
+        showToast(err.message, true);
+        document.getElementById('submitBtn').disabled = false;
+        textElement.innerText = 'Upload Failed';
+        textElement.style.color = 'var(--danger)';
+        setTimeout(() => {
+          document.getElementById('confirmBoxOptions').style.display = 'block';
+          document.getElementById('uploadProgressContainer').style.display = 'none';
+        }, 3000);
       }
     }
 
