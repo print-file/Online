@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   
   <style>
     :root { 
@@ -49,7 +50,7 @@
     .btn-cancel { background: #f1f5f9; color: #475569; box-shadow: none;}
     .btn-cancel:hover { background: #e2e8f0; color: #0f172a; box-shadow: none;}
 
-    .modal { display: flex; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(6px); padding: 20px; align-items: center; justify-content: center; z-index: 50; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+    .modal { display: flex; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(6px); padding: 20px; align-items: center; justify-content: center; z-index: 50; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
     .modal.active { opacity: 1; visibility: visible; }
     .modal-content { background: #ffffff; width: 100%; max-width: 550px; padding: 35px; border-radius: 20px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: translateY(20px) scale(0.95); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
     .modal.active .modal-content { transform: translateY(0) scale(1); }
@@ -66,6 +67,23 @@
     input[type="file"]:hover { border-color: var(--primary); background: #eff6ff;}
     input[type="file"]::file-selector-button { background: #e2e8f0; color: #475569; border: none; padding: 8px 16px; border-radius: 8px; margin-right: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
     input[type="file"]::file-selector-button:hover { background: #cbd5e1; color: #0f172a;}
+
+    /* Selected Files Chip List */
+    .selected-files-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .file-item {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+      padding: 10px 12px; font-size: 13px; color: #1e293b; gap: 10px;
+    }
+    .file-item-name {
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500;
+    }
+    .file-remove-btn {
+      width: 26px; height: 26px; min-width: 26px; padding: 0; border-radius: 50%;
+      background: #fee2e2; color: var(--danger); font-size: 16px; line-height: 1;
+      box-shadow: none; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .file-remove-btn:hover { background: #fecaca; transform: none; box-shadow: none; }
 
     .summary-box { background: #f8fafc; padding: 20px; border-radius: 16px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
     .summary-box p { display: flex; justify-content: space-between; margin-bottom: 8px; color: #475569;}
@@ -84,7 +102,7 @@
       border: 1px solid #e2e8f0;
       border-radius: 18px;
       padding: 20px 18px;
-      margin-top: 18px;
+      margin-top: 16px;
       box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
       text-align: center;
     }
@@ -111,7 +129,6 @@
       flex-shrink: 0;
     }
     .icon-circle.wa { background: #dcfce7; }
-    .icon-circle.bkash { background: #fce7f3; }
 
     .info-pill {
       display: flex;
@@ -151,6 +168,13 @@
       font-size: 18px;
       font-weight: 500;
     }
+    .bkash-wordmark {
+      font-weight: 700;
+      font-size: 17px;
+      color: #e2136e;
+      letter-spacing: -0.3px;
+      line-height: 1.1;
+    }
     .copy-tag {
       font-size: 12px;
       font-weight: 600;
@@ -158,6 +182,17 @@
       background: #fce7f3;
       padding: 4px 10px;
       border-radius: 20px;
+    }
+
+    .success-banner {
+      text-align: center;
+      padding: 10px 0 6px;
+    }
+    .success-icon {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: #d1fae5; color: var(--success);
+      display: inline-flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
     }
 
     .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; background: white;}
@@ -176,7 +211,7 @@
     .progress-bar { height: 14px; background: #f1f5f9; border-radius: 7px; overflow: hidden; margin-top: 15px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);}
     .progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.4s ease; border-radius: 7px;}
     
-    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 28px; border-radius: 30px; display: none; z-index: 100; font-weight: 500; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);}
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 28px; border-radius: 30px; display: none; z-index: 120; font-weight: 500; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); text-align: center; }
     
     .confirm-box { text-align: center; padding: 20px 10px; }
     .confirm-box h2 { color: #0f172a; margin-bottom: 10px; }
@@ -235,8 +270,9 @@
       </div>
       
       <div class="form-group">
-        <label>Document Files (Multiple PDFs supported)</label>
+        <label>Document Files (Max 5 PDFs)</label>
         <input type="file" id="pdfInput" accept="application/pdf" multiple onchange="handleFileChange()">
+        <div id="selectedFilesList" class="selected-files-list"></div>
       </div>
       
       <div class="form-group">
@@ -262,77 +298,9 @@
         </div>
         
         <label>Page Breakdown</label>
-        <div id="thumbnailContainer" style="max-height: 280px; overflow-y: auto; padding: 5px;"></div>
+        <div id="thumbnailContainer" style="max-height: 260px; overflow-y: auto; padding: 5px;"></div>
         
-        <button id="submitBtn" onclick="submitOrder()" style="margin-top: 20px; width: 100%; box-shadow: 0 4px 14px rgba(37,99,235,0.35);">Confirm & Upload</button>
-
-        <!-- WhatsApp Contact Card -->
-        <div class="info-card">
-          <div class="info-card-header">
-            <div class="icon-circle wa">
-              <svg width="22" height="22" viewBox="0 0 32 32" fill="#25D366">
-                <path d="M16 3C8.82 3 3 8.82 3 16c0 2.31.61 4.56 1.76 6.54L3 29l6.65-1.74A12.93 12.93 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm7.58 18.36c-.32.9-1.86 1.72-2.57 1.83-.66.1-1.5.14-2.42-.15-.56-.18-1.28-.42-2.2-.82-3.87-1.67-6.4-5.58-6.59-5.84-.19-.26-1.57-2.09-1.57-3.99 0-1.9.99-2.83 1.34-3.22.35-.39.77-.49 1.03-.49.26 0 .51.01.74.02.24.01.56-.09.88.67.32.77 1.09 2.66 1.19 2.85.1.19.16.42.03.68-.13.26-.19.42-.39.64-.19.22-.41.5-.58.67-.19.19-.4.4-.17.79.23.39 1.01 1.67 2.17 2.7 1.49 1.33 2.75 1.74 3.14 1.94.39.19.62.16.85-.1.23-.26.98-1.14 1.24-1.53.26-.39.52-.32.88-.19.36.13 2.27 1.07 2.66 1.27.39.19.65.29.74.45.1.16.1.93-.22 1.83z"/>
-              </svg>
-            </div>
-            <h4>Contact us on WhatsApp</h4>
-          </div>
-          <a href="https://wa.me/8801521779357" target="_blank" rel="noopener noreferrer" class="info-pill">
-            <span class="info-pill-left">
-              <svg width="22" height="22" viewBox="0 0 32 32" fill="#25D366">
-                <path d="M16 3C8.82 3 3 8.82 3 16c0 2.31.61 4.56 1.76 6.54L3 29l6.65-1.74A12.93 12.93 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm7.58 18.36c-.32.9-1.86 1.72-2.57 1.83-.66.1-1.5.14-2.42-.15-.56-.18-1.28-.42-2.2-.82-3.87-1.67-6.4-5.58-6.59-5.84-.19-.26-1.57-2.09-1.57-3.99 0-1.9.99-2.83 1.34-3.22.35-.39.77-.49 1.03-.49.26 0 .51.01.74.02.24.01.56-.09.88.67.32.77 1.09 2.66 1.19 2.85.1.19.16.42.03.68-.13.26-.19.42-.39.64-.19.22-.41.5-.58.67-.19.19-.4.4-.17.79.23.39 1.01 1.67 2.17 2.7 1.49 1.33 2.75 1.74 3.14 1.94.39.19.62.16.85-.1.23-.26.98-1.14 1.24-1.53.26-.39.52-.32.88-.19.36.13 2.27 1.07 2.66 1.27.39.19.65.29.74.45.1.16.1.93-.22 1.83z"/>
-              </svg>
-              <span>01521779357</span>
-            </span>
-            <span class="pill-chevron">&#8250;</span>
-          </a>
-        </div>
-
-        <!-- Payment Method Card -->
-        <div class="info-card">
-          <div class="info-card-header">
-            <div class="icon-circle bkash">
-              <svg width="24" height="24" viewBox="0 0 64 64" fill="none">
-                <path d="M12 16L33 22L27 42L12 16Z" fill="#E2136E"/>
-                <path d="M33 22L54 14L41 34L33 22Z" fill="#D11063"/>
-                <path d="M27 42L41 34L35 50L27 42Z" fill="#E2136E"/>
-                <path d="M41 34L54 14L49 36L41 34Z" fill="#B50D55"/>
-                <path d="M12 16L22 33L14 38L12 16Z" fill="#C40F5D"/>
-              </svg>
-            </div>
-            <h4>Payment Method</h4>
-          </div>
-
-          <div class="info-pill" onclick="copyText('01521779357', 'bKash number copied!')">
-            <span class="info-pill-left">
-              <svg width="24" height="24" viewBox="0 0 64 64" fill="none">
-                <path d="M12 16L33 22L27 42L12 16Z" fill="#E2136E"/>
-                <path d="M33 22L54 14L41 34L33 22Z" fill="#D11063"/>
-                <path d="M27 42L41 34L35 50L27 42Z" fill="#E2136E"/>
-                <path d="M41 34L54 14L49 36L41 34Z" fill="#B50D55"/>
-                <path d="M12 16L22 33L14 38L12 16Z" fill="#C40F5D"/>
-              </svg>
-              <span>
-                01521779357
-                <span class="info-pill-sub">bKash (Send Money)</span>
-              </span>
-            </span>
-            <span class="copy-tag">Copy</span>
-          </div>
-
-          <div class="info-pill" style="cursor: default;">
-            <span class="info-pill-left">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="6" width="20" height="12" rx="2"></rect>
-                <circle cx="12" cy="12" r="2"></circle>
-                <path d="M6 12h.01M18 12h.01"></path>
-              </svg>
-              <span>
-                Hand Cash
-                <span class="info-pill-sub">Pay directly on pickup</span>
-              </span>
-            </span>
-          </div>
-        </div>
+        <button id="submitBtn" onclick="submitOrder()" style="margin-top: 20px; width: 100%; box-shadow: 0 4px 14px rgba(37,99,235,0.35);">Upload & Confirm</button>
       </div>
     </div>
   </div>
@@ -353,8 +321,76 @@
       
       <div id="uploadProgressContainer" style="display:none; text-align: center; padding: 25px 0;">
         <div class="spinner"></div>
-        <p id="uploadPercentText" style="font-weight: 600; color: var(--primary); margin-top: 20px; font-size: 1.05rem;">Uploading...</p>
+        <p id="uploadPercentText" style="font-weight: 600; color: var(--primary); margin-top: 20px; font-size: 1.05rem;">Merging & Uploading...</p>
         <div class="progress-bar" style="display:block"><div class="progress-fill" id="uploadFill"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Post-Upload Floating Confirmation Modal (Stays open until closed via X) -->
+  <div class="modal" id="successUploadModal" style="z-index: 80;">
+    <div class="modal-content" style="max-width: 480px;">
+      <button class="close-btn" onclick="closeModal('successUploadModal')">&times;</button>
+      
+      <div class="success-banner">
+        <div class="success-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <h2 style="color: #0f172a; margin-bottom: 6px; font-size: 1.45rem;">Upload Successful!</h2>
+        <p id="successSummaryText" style="color: #64748b; font-size: 14px;"></p>
+      </div>
+
+      <!-- Confirm via WhatsApp Card -->
+      <div class="info-card">
+        <div class="info-card-header">
+          <div class="icon-circle wa">
+            <svg width="22" height="22" viewBox="0 0 32 32" fill="#25D366">
+              <path d="M16 3C8.82 3 3 8.82 3 16c0 2.31.61 4.56 1.76 6.54L3 29l6.65-1.74A12.93 12.93 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm7.58 18.36c-.32.9-1.86 1.72-2.57 1.83-.66.1-1.5.14-2.42-.15-.56-.18-1.28-.42-2.2-.82-3.87-1.67-6.4-5.58-6.59-5.84-.19-.26-1.57-2.09-1.57-3.99 0-1.9.99-2.83 1.34-3.22.35-.39.77-.49 1.03-.49.26 0 .51.01.74.02.24.01.56-.09.88.67.32.77 1.09 2.66 1.19 2.85.1.19.16.42.03.68-.13.26-.19.42-.39.64-.19.22-.41.5-.58.67-.19.19-.4.4-.17.79.23.39 1.01 1.67 2.17 2.7 1.49 1.33 2.75 1.74 3.14 1.94.39.19.62.16.85-.1.23-.26.98-1.14 1.24-1.53.26-.39.52-.32.88-.19.36.13 2.27 1.07 2.66 1.27.39.19.65.29.74.45.1.16.1.93-.22 1.83z"/>
+            </svg>
+          </div>
+          <h4>Confirm via WhatsApp</h4>
+        </div>
+        <a href="https://wa.me/8801521779357" target="_blank" rel="noopener noreferrer" class="info-pill">
+          <span class="info-pill-left">
+            <svg width="22" height="22" viewBox="0 0 32 32" fill="#25D366">
+              <path d="M16 3C8.82 3 3 8.82 3 16c0 2.31.61 4.56 1.76 6.54L3 29l6.65-1.74A12.93 12.93 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm7.58 18.36c-.32.9-1.86 1.72-2.57 1.83-.66.1-1.5.14-2.42-.15-.56-.18-1.28-.42-2.2-.82-3.87-1.67-6.4-5.58-6.59-5.84-.19-.26-1.57-2.09-1.57-3.99 0-1.9.99-2.83 1.34-3.22.35-.39.77-.49 1.03-.49.26 0 .51.01.74.02.24.01.56-.09.88.67.32.77 1.09 2.66 1.19 2.85.1.19.16.42.03.68-.13.26-.19.42-.39.64-.19.22-.41.5-.58.67-.19.19-.4.4-.17.79.23.39 1.01 1.67 2.17 2.7 1.49 1.33 2.75 1.74 3.14 1.94.39.19.62.16.85-.1.23-.26.98-1.14 1.24-1.53.26-.39.52-.32.88-.19.36.13 2.27 1.07 2.66 1.27.39.19.65.29.74.45.1.16.1.93-.22 1.83z"/>
+            </svg>
+            <span>01521779357</span>
+          </span>
+          <span class="pill-chevron">&#8250;</span>
+        </a>
+      </div>
+
+      <!-- Payment Method Card (No logo before heading, pink bKash wordmark) -->
+      <div class="info-card">
+        <div class="info-card-header">
+          <h4>Payment Method</h4>
+        </div>
+
+        <div class="info-pill" onclick="copyText('01521779357', 'bKash number copied!')">
+          <span class="info-pill-left">
+            <span class="bkash-wordmark">bKash</span>
+            <span>
+              01521779357
+              <span class="info-pill-sub">Send Money</span>
+            </span>
+          </span>
+          <span class="copy-tag">Copy</span>
+        </div>
+
+        <div class="info-pill" style="cursor: default;">
+          <span class="info-pill-left">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+              <circle cx="12" cy="12" r="2"></circle>
+              <path d="M6 12h.01M18 12h.01"></path>
+            </svg>
+            <span>
+              Hand Cash
+              <span class="info-pill-sub">Pay directly on pickup</span>
+            </span>
+          </span>
+        </div>
       </div>
     </div>
   </div>
@@ -396,6 +432,7 @@
 
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbzGqceR7xEromxTcL-A-DZFdbokL9sjWYuWtMv4xZzpmVfHOUyvLipNiz4YIhucE6jc/exec';
+    const MAX_FILES = 5;
 
     const CONFIG = {
       pricing: {
@@ -406,7 +443,15 @@
     };
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-    let cachedJobs = [];
+    let selectedFiles = [];   // Array of File objects (max 5)
+    let analyzedFiles = [];   // Array of { file, fileName, numPages, pagesAnalysis }
+    let mergedJobMeta = null; // Aggregated metadata for the merged PDF upload
+
+    function generateSubId() {
+      return (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : 'sub_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+    }
 
     window.addEventListener('DOMContentLoaded', async () => {
       const btn = document.getElementById('startPrintBtn');
@@ -430,10 +475,10 @@
     
     function closeModal(id) { 
       document.getElementById(id).classList.remove('active'); 
-      if(id === 'confirmModal') {
-          document.getElementById('submitBtn').disabled = false;
-      } else if (id === 'printModal' || id === 'dueModal') {
-          setTimeout(resetForms, 300);
+      if (id === 'confirmModal') {
+        document.getElementById('submitBtn').disabled = false;
+      } else if (id === 'printModal' || id === 'dueModal' || id === 'successUploadModal') {
+        setTimeout(resetForms, 300);
       }
     }
     
@@ -446,17 +491,18 @@
     }
 
     function copyText(text, msg) {
-      navigator.clipboard.writeText(text).then(() => {
-        showToast(msg);
-      }).catch(() => {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => showToast(msg)).catch(() => showToast('Number: ' + text));
+      } else {
         showToast('Number: ' + text);
-      });
+      }
     }
 
     function resetForms() {
       document.getElementById('rollInput').value = '';
       document.getElementById('pdfInput').value = '';
       document.getElementById('modeInput').value = '';
+      document.getElementById('selectedFilesList').innerHTML = '';
       document.getElementById('processingArea').style.display = 'none';
       document.getElementById('previewArea').style.display = 'none';
       document.getElementById('submitBtn').disabled = false;
@@ -467,12 +513,77 @@
       document.getElementById('uploadPercentText').style.color = 'var(--primary)';
       document.getElementById('dueResults').style.display = 'none';
       
-      cachedJobs = [];
+      selectedFiles = [];
+      analyzedFiles = [];
+      mergedJobMeta = null;
+    }
+
+    function renderSelectedFilesList() {
+      const list = document.getElementById('selectedFilesList');
+      list.innerHTML = '';
+      selectedFiles.forEach((file, idx) => {
+        const item = document.createElement('div');
+        item.className = 'file-item';
+        item.innerHTML = `
+          <span class="file-item-name" title="${file.name}">${idx + 1}. ${file.name}</span>
+          <button type="button" class="file-remove-btn" onclick="removeFile(${idx})" title="Remove file">&times;</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function removeFile(index) {
+      selectedFiles.splice(index, 1);
+      if (analyzedFiles[index]) analyzedFiles.splice(index, 1);
+      renderSelectedFilesList();
+
+      if (selectedFiles.length === 0) {
+        document.getElementById('previewArea').style.display = 'none';
+        mergedJobMeta = null;
+        return;
+      }
+
+      const mode = document.getElementById('modeInput').value;
+      if (mode && analyzedFiles.length === selectedFiles.length) {
+        recalculateEstimate(mode);
+      } else if (mode) {
+        processPDFs();
+      }
     }
 
     function handleFileChange() {
-      cachedJobs = [];
+      const fileInput = document.getElementById('pdfInput');
+      const incoming = Array.from(fileInput.files || []);
+      fileInput.value = ''; // Allow re-selecting or adding more files
+
+      if (incoming.length === 0) return;
+
+      for (const f of incoming) {
+        if (f.type !== 'application/pdf') {
+          showToast(`Invalid file: ${f.name} (PDF only)`, true);
+          return;
+        }
+        if (f.size > 100 * 1024 * 1024) {
+          showToast(`${f.name} is too large (Max 100MB)`, true);
+          return;
+        }
+      }
+
+      if (selectedFiles.length + incoming.length > MAX_FILES) {
+        showToast(`Maximum ${MAX_FILES} PDF files allowed`, true);
+        const remaining = MAX_FILES - selectedFiles.length;
+        if (remaining > 0) {
+          selectedFiles.push(...incoming.slice(0, remaining));
+        }
+      } else {
+        selectedFiles.push(...incoming);
+      }
+
+      analyzedFiles = [];
+      mergedJobMeta = null;
       document.getElementById('previewArea').style.display = 'none';
+      renderSelectedFilesList();
+
       const mode = document.getElementById('modeInput').value;
       if (mode) {
         processPDFs();
@@ -483,15 +594,12 @@
       const mode = document.getElementById('modeInput').value;
       if (!mode) return;
 
-      if (cachedJobs.length > 0) {
+      if (analyzedFiles.length > 0 && analyzedFiles.length === selectedFiles.length) {
         recalculateEstimate(mode);
+      } else if (selectedFiles.length > 0) {
+        processPDFs();
       } else {
-        const fileInput = document.getElementById('pdfInput');
-        if (fileInput.files && fileInput.files.length > 0) {
-          processPDFs();
-        } else {
-          showToast('Please select at least one PDF file first', true);
-        }
+        showToast('Please select at least one PDF file first', true);
       }
     }
 
@@ -504,42 +612,37 @@
       });
     }
 
-    function readFileAsBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
     function recalculateEstimate(mode) {
-      let grandTotalCost = 0;
+      let totalCost = 0;
       let totalPagesCount = 0;
       let totalPrintable = 0;
       let totalBlank = 0;
+      const flatPageDetails = [];
 
       const container = document.getElementById('thumbnailContainer');
       container.innerHTML = '';
 
-      cachedJobs.forEach((job, idx) => {
+      analyzedFiles.forEach((item, idx) => {
         let fileCost = 0;
-        const pageDetails = [];
-
         const groupDiv = document.createElement('div');
         groupDiv.className = 'file-group';
 
         const gridDiv = document.createElement('div');
         gridDiv.className = 'preview-grid';
 
-        job.pagesAnalysis.forEach(p => {
+        item.pagesAnalysis.forEach(p => {
           const cost = CONFIG.pricing[mode][p.intensity] || 0;
           fileCost += cost;
+          totalCost += cost;
           totalPagesCount++;
           if (p.intensity === 'Blank') totalBlank++;
           else totalPrintable++;
 
-          pageDetails.push({ page: p.page, intensity: p.intensity, cost: cost });
+          flatPageDetails.push({
+            page: totalPagesCount,
+            intensity: p.intensity,
+            cost: cost
+          });
 
           const isBlank = p.intensity === 'Blank';
           const badgeColor = isBlank ? '#059669' : '#64748b';
@@ -553,18 +656,11 @@
           gridDiv.appendChild(thumbDiv);
         });
 
-        const roundedFileCost = Math.round(fileCost);
-        grandTotalCost += roundedFileCost;
-
-        job.mode = mode;
-        job.pageDetails = pageDetails;
-        job.totalAmount = roundedFileCost;
-
         const headerDiv = document.createElement('div');
         headerDiv.className = 'file-group-header';
         headerDiv.innerHTML = `
-          <span class="file-group-name" title="${job.fileName}">${idx + 1}. ${job.fileName}</span>
-          <span style="white-space:nowrap; color:var(--primary);">${roundedFileCost} Tk</span>
+          <span class="file-group-name" title="${item.fileName}">${idx + 1}. ${item.fileName}</span>
+          <span style="white-space:nowrap; color:var(--primary);">${Math.round(fileCost)} Tk</span>
         `;
 
         groupDiv.appendChild(headerDiv);
@@ -572,35 +668,37 @@
         container.appendChild(groupDiv);
       });
 
-      document.getElementById('summaryFiles').innerText = cachedJobs.length;
+      const roundedTotal = Math.round(totalCost);
+
+      document.getElementById('summaryFiles').innerText = analyzedFiles.length;
       document.getElementById('summaryPages').innerText = totalBlank > 0
         ? `${totalPagesCount} (${totalPrintable} Printable, ${totalBlank} Blank)`
         : `${totalPagesCount}`;
       document.getElementById('summaryModeDisplay').innerText = mode === 'bw' ? 'Black & White' : 'Color';
-      document.getElementById('summaryCost').innerText = grandTotalCost;
+      document.getElementById('summaryCost').innerText = roundedTotal;
+
+      mergedJobMeta = {
+        subId: generateSubId(),
+        mode: mode,
+        totalPages: totalPagesCount,
+        pageDetails: flatPageDetails,
+        totalAmount: roundedTotal
+      };
     }
 
     async function processPDFs() {
-      const fileInput = document.getElementById('pdfInput');
       const mode = document.getElementById('modeInput').value;
-      const files = Array.from(fileInput.files || []);
-
-      if (files.length === 0) return showToast('Please select at least one PDF file', true);
+      if (selectedFiles.length === 0) return showToast('Please select at least one PDF file', true);
       if (!mode) return;
-
-      for (const f of files) {
-        if (f.type !== 'application/pdf') return showToast(`Invalid file: ${f.name} (PDF only)`, true);
-        if (f.size > 100 * 1024 * 1024) return showToast(`${f.name} is too large (Max 100MB)`, true);
-      }
 
       document.getElementById('previewArea').style.display = 'none';
       document.getElementById('processingArea').style.display = 'block';
-      cachedJobs = [];
+      analyzedFiles = [];
 
       try {
-        for (let fIdx = 0; fIdx < files.length; fIdx++) {
-          const file = files[fIdx];
-          document.getElementById('processStatus').innerText = `Loading file ${fIdx + 1} of ${files.length}...`;
+        for (let fIdx = 0; fIdx < selectedFiles.length; fIdx++) {
+          const file = selectedFiles[fIdx];
+          document.getElementById('processStatus').innerText = `Loading file ${fIdx + 1} of ${selectedFiles.length}...`;
 
           const arrayBuffer = await readFileAsArrayBuffer(file);
           const typedarray = new Uint8Array(arrayBuffer);
@@ -611,7 +709,7 @@
 
           for (let i = 1; i <= numPages; i++) {
             document.getElementById('processStatus').innerText =
-              `File ${fIdx + 1}/${files.length}: Analyzing page ${i} of ${numPages}...`;
+              `File ${fIdx + 1}/${selectedFiles.length}: Analyzing page ${i} of ${numPages}...`;
             const page = await pdf.getPage(i);
             const viewport = page.getViewport({ scale: 0.2 });
             const canvas = document.createElement('canvas');
@@ -645,15 +743,11 @@
             });
           }
 
-          cachedJobs.push({
-            subId: crypto.randomUUID(),
+          analyzedFiles.push({
             file: file,
             fileName: file.name,
-            mode: mode,
-            totalPages: numPages,
-            pagesAnalysis: pagesAnalysis,
-            pageDetails: [],
-            totalAmount: 0
+            numPages: numPages,
+            pagesAnalysis: pagesAnalysis
           });
         }
 
@@ -665,8 +759,19 @@
         console.error(err);
         showToast('Error parsing one of the PDFs', true);
         document.getElementById('processingArea').style.display = 'none';
-        cachedJobs = [];
+        analyzedFiles = [];
       }
+    }
+
+    async function mergeSelectedPDFsToBase64() {
+      const mergedPdf = await PDFLib.PDFDocument.create();
+      for (const item of analyzedFiles) {
+        const arrayBuffer = await readFileAsArrayBuffer(item.file);
+        const srcPdf = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+        const copiedPages = await mergedPdf.copyPages(srcPdf, srcPdf.getPageIndices());
+        copiedPages.forEach(p => mergedPdf.addPage(p));
+      }
+      return await mergedPdf.saveAsBase64();
     }
 
     async function apiRequest(payload) {
@@ -682,17 +787,21 @@
     }
 
     function submitOrder() {
-      if (cachedJobs.length === 0) return;
+      if (!mergedJobMeta || analyzedFiles.length === 0) return;
       const roll = document.getElementById('rollInput').value;
       if (!/^\d{7}$/.test(roll)) return showToast('Please enter a 7-digit roll number', true);
 
-      const grandTotal = cachedJobs.reduce((sum, j) => sum + j.totalAmount, 0);
-      cachedJobs.forEach(j => j.roll = roll);
+      mergedJobMeta.roll = roll;
+      mergedJobMeta.fileName = analyzedFiles.length === 1
+        ? analyzedFiles[0].fileName
+        : `Merged_${roll}_${analyzedFiles.length}files.pdf`;
 
       document.getElementById('submitBtn').disabled = true;
       document.getElementById('confirmFileCount').innerText =
-        cachedJobs.length > 1 ? `${cachedJobs.length} PDF files selected` : `1 PDF file selected`;
-      document.getElementById('confirmTotal').innerText = grandTotal;
+        analyzedFiles.length > 1
+          ? `${analyzedFiles.length} PDFs will be merged into 1 file (${mergedJobMeta.totalPages} pages)`
+          : `1 PDF file (${mergedJobMeta.totalPages} pages)`;
+      document.getElementById('confirmTotal').innerText = mergedJobMeta.totalAmount;
       openModal('confirmModal');
     }
 
@@ -704,52 +813,45 @@
       textElement.style.color = 'var(--primary)';
 
       const CHUNK_SIZE = 1024 * 1024 * 3;
-      const totalFiles = cachedJobs.length;
 
       try {
-        for (let fIdx = 0; fIdx < totalFiles; fIdx++) {
-          const job = cachedJobs[fIdx];
-          textElement.innerText = `Preparing file ${fIdx + 1} of ${totalFiles}...`;
+        textElement.innerText = analyzedFiles.length > 1 ? 'Merging PDFs...' : 'Preparing PDF...';
+        fill.style.width = '10%';
 
-          const base64 = await readFileAsBase64(job.file);
-          const totalChunks = Math.ceil(base64.length / CHUNK_SIZE);
+        const mergedBase64 = await mergeSelectedPDFsToBase64();
+        const totalChunks = Math.ceil(mergedBase64.length / CHUNK_SIZE);
 
-          for (let i = 0; i < totalChunks; i++) {
-            const chunk = base64.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-            await apiRequest({
-              action: 'uploadChunk',
-              subId: job.subId,
-              chunkIndex: i,
-              chunkBase64: chunk
-            });
-
-            const fileProgress = ((i + 1) / totalChunks) * 0.85;
-            const overallPercent = Math.round(((fIdx + fileProgress) / totalFiles) * 100);
-            fill.style.width = overallPercent + '%';
-            textElement.innerText = `Uploading file ${fIdx + 1}/${totalFiles}: ${overallPercent}%`;
-          }
-
-          textElement.innerText = `Finalizing file ${fIdx + 1}/${totalFiles}...`;
+        for (let i = 0; i < totalChunks; i++) {
+          const chunk = mergedBase64.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
           await apiRequest({
-            action: 'submitPrintJob',
-            subId: job.subId,
-            roll: job.roll,
-            fileName: job.fileName,
-            mode: job.mode,
-            totalPages: job.totalPages,
-            pageDetails: job.pageDetails,
-            totalAmount: job.totalAmount
+            action: 'uploadChunk',
+            subId: mergedJobMeta.subId,
+            chunkIndex: i,
+            chunkBase64: chunk
           });
 
-          const donePercent = Math.round(((fIdx + 1) / totalFiles) * 100);
-          fill.style.width = donePercent + '%';
+          const percent = 10 + Math.round(((i + 1) / totalChunks) * 80);
+          fill.style.width = percent + '%';
+          textElement.innerText = `Uploading...: ${percent}%`;
         }
 
+        textElement.innerText = 'Finalizing order...';
+        await apiRequest({
+          action: 'submitPrintJob',
+          ...mergedJobMeta
+        });
+
         fill.style.width = '100%';
-        textElement.innerText = 'All files uploaded!';
-        textElement.style.color = 'var(--success)';
-        showToast(`${totalFiles} file(s) uploaded successfully!`);
-        setTimeout(() => { closeModal('confirmModal'); closeModal('printModal'); }, 1500);
+        const finalAmount = mergedJobMeta.totalAmount;
+        const finalPages = mergedJobMeta.totalPages;
+        const finalRoll = mergedJobMeta.roll;
+
+        // Close upload/print modals and open persistent confirmation modal
+        document.getElementById('confirmModal').classList.remove('active');
+        document.getElementById('printModal').classList.remove('active');
+        document.getElementById('successSummaryText').innerHTML =
+          `Roll <strong>${finalRoll}</strong> &bull; <strong>${finalPages}</strong> Pages &bull; Total: <strong style="color:var(--primary)">${finalAmount} Tk</strong>`;
+        openModal('successUploadModal');
 
       } catch (err) {
         showToast(err.message, true);
@@ -784,12 +886,13 @@
         else { data.history.forEach(h => { payHtml += `<tr><td>${h.date}</td><td>${h.time}</td><td><strong style="color:var(--success)">+${h.amount} Tk</strong></td></tr>`; }); }
         payHtml += '</tbody></table>'; document.getElementById('paymentHistoryList').innerHTML = payHtml;
           
-        let printHtml = '<table class="history-table"><thead><tr><th>Date</th><th>Time</th><th>Cost</th><th>Status</th></tr></thead><tbody>';
-        if (!data.recentPrints || data.recentPrints.length === 0) { printHtml += '<tr><td colspan="4" style="text-align:center; padding: 20px; color:#64748b;">No print records found.</td></tr>'; } 
+        let printHtml = '<table class="history-table"><thead><tr><th>Date</th><th>Time</th><th>Pages</th><th>Cost</th><th>Status</th></tr></thead><tbody>';
+        if (!data.recentPrints || data.recentPrints.length === 0) { printHtml += '<tr><td colspan="5" style="text-align:center; padding: 20px; color:#64748b;">No print records found.</td></tr>'; } 
         else {
             data.recentPrints.forEach(p => {
                 const badge = p.status === 'Completed' ? '<span class="badge success">Completed</span>' : '<span class="badge pending">Pending</span>';
-                printHtml += `<tr><td>${p.date}</td><td>${p.time}</td><td><strong>${p.amount} Tk</strong></td><td>${badge}</td></tr>`;
+                const pages = p.pages || p.totalPages || p['Total Pages'] || '-';
+                printHtml += `<tr><td>${p.date}</td><td>${p.time}</td><td>${pages}</td><td><strong>${p.amount} Tk</strong></td><td>${badge}</td></tr>`;
             });
         }
         printHtml += '</tbody></table>'; document.getElementById('recentPrintList').innerHTML = printHtml;
