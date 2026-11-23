@@ -68,7 +68,7 @@
     input[type="file"]::file-selector-button { background: #e2e8f0; color: #475569; border: none; padding: 8px 16px; border-radius: 8px; margin-right: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
     input[type="file"]::file-selector-button:hover { background: #cbd5e1; color: #0f172a;}
 
-    /* Selected Files Chip List */
+    /* Selected Files List */
     .selected-files-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
     .file-item {
       display: flex; align-items: center; justify-content: space-between;
@@ -110,7 +110,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
       margin-bottom: 14px;
     }
     .info-card-header h4 {
@@ -119,16 +118,6 @@
       color: #0f172a;
       margin: 0;
     }
-    .icon-circle {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .icon-circle.wa { background: #dcfce7; }
 
     .info-pill {
       display: flex;
@@ -151,6 +140,11 @@
       border-color: #cbd5e1;
       transform: translateY(-1px);
     }
+    .info-pill-centered {
+      position: relative;
+      justify-content: center;
+      padding: 15px 44px;
+    }
     .info-pill-left {
       display: flex;
       align-items: center;
@@ -163,10 +157,15 @@
       font-weight: 400;
       color: #64748b;
     }
-    .pill-chevron {
-      color: #94a3b8;
-      font-size: 18px;
-      font-weight: 500;
+    .pill-arrow {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .bkash-wordmark {
       font-weight: 700;
@@ -189,10 +188,18 @@
       padding: 10px 0 6px;
     }
     .success-icon {
-      width: 60px; height: 60px; border-radius: 50%;
+      width: 58px; height: 58px; border-radius: 50%;
       background: #d1fae5; color: var(--success);
       display: inline-flex; align-items: center; justify-content: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
+    }
+    .success-amount {
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 10px 0 4px;
+      letter-spacing: -1px;
+      line-height: 1.1;
     }
 
     .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; background: white;}
@@ -216,7 +223,7 @@
     .confirm-box { text-align: center; padding: 20px 10px; }
     .confirm-box h2 { color: #0f172a; margin-bottom: 10px; }
     .confirm-box p { color: #64748b; }
-    .confirm-box .price { font-size: 40px; font-weight: 700; color: var(--primary); margin: 25px 0; letter-spacing: -1px;}
+    .confirm-box .price { font-size: 40px; font-weight: 700; color: var(--primary); margin: 22px 0; letter-spacing: -1px;}
     .confirm-btn-group { display: flex; gap: 15px; margin-top: 25px; }
 
     ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -270,7 +277,7 @@
       </div>
       
       <div class="form-group">
-        <label>Document Files (Max 5 PDFs)</label>
+        <label>Document Files (Max 5 PDFs, up to 30MB each)</label>
         <input type="file" id="pdfInput" accept="application/pdf" multiple onchange="handleFileChange()">
         <div id="selectedFilesList" class="selected-files-list"></div>
       </div>
@@ -311,7 +318,7 @@
       <button class="close-btn" onclick="closeModal('confirmModal')">&times;</button>
       <div class="confirm-box" id="confirmBoxOptions">
         <h2 style="margin-top:10px;">Confirm Submission</h2>
-        <p id="confirmFileCount" style="margin-bottom: 5px;"></p>
+        <p id="confirmFileCount" style="font-size: 13px; margin-bottom: 5px;"></p>
         <div class="price"><span id="confirmTotal">0</span> Tk</div>
         <div class="confirm-btn-group">
           <button class="btn-cancel" onclick="closeModal('confirmModal')">Cancel</button>
@@ -321,43 +328,41 @@
       
       <div id="uploadProgressContainer" style="display:none; text-align: center; padding: 25px 0;">
         <div class="spinner"></div>
-        <p id="uploadPercentText" style="font-weight: 600; color: var(--primary); margin-top: 20px; font-size: 1.05rem;">Merging & Uploading...</p>
+        <p id="uploadPercentText" style="font-weight: 600; color: var(--primary); margin-top: 20px; font-size: 1.05rem;">Preparing...</p>
         <div class="progress-bar" style="display:block"><div class="progress-fill" id="uploadFill"></div></div>
       </div>
     </div>
   </div>
 
-  <!-- Post-Upload Floating Confirmation Modal (Stays open until closed via X) -->
+  <!-- Post-Upload Floating Confirmation Modal (Stays visible until closed via X) -->
   <div class="modal" id="successUploadModal" style="z-index: 80;">
     <div class="modal-content" style="max-width: 480px;">
       <button class="close-btn" onclick="closeModal('successUploadModal')">&times;</button>
       
       <div class="success-banner">
         <div class="success-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
         </div>
-        <h2 style="color: #0f172a; margin-bottom: 6px; font-size: 1.45rem;">Upload Successful!</h2>
+        <h2 style="color: #0f172a; margin-bottom: 4px; font-size: 1.4rem;">Upload Successful!</h2>
+        <div class="success-amount"><span id="successTotalAmount">0</span> Tk</div>
         <p id="successSummaryText" style="color: #64748b; font-size: 14px;"></p>
       </div>
 
-      <!-- Confirm via WhatsApp Card -->
+      <!-- Confirm via WhatsApp Card (No logo in header, centered number + WA logo, large clear right arrow) -->
       <div class="info-card">
         <div class="info-card-header">
-          <div class="icon-circle wa">
-            <svg width="22" height="22" viewBox="0 0 32 32" fill="#25D366">
-              <path d="M16 3C8.82 3 3 8.82 3 16c0 2.31.61 4.56 1.76 6.54L3 29l6.65-1.74A12.93 12.93 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm7.58 18.36c-.32.9-1.86 1.72-2.57 1.83-.66.1-1.5.14-2.42-.15-.56-.18-1.28-.42-2.2-.82-3.87-1.67-6.4-5.58-6.59-5.84-.19-.26-1.57-2.09-1.57-3.99 0-1.9.99-2.83 1.34-3.22.35-.39.77-.49 1.03-.49.26 0 .51.01.74.02.24.01.56-.09.88.67.32.77 1.09 2.66 1.19 2.85.1.19.16.42.03.68-.13.26-.19.42-.39.64-.19.22-.41.5-.58.67-.19.19-.4.4-.17.79.23.39 1.01 1.67 2.17 2.7 1.49 1.33 2.75 1.74 3.14 1.94.39.19.62.16.85-.1.23-.26.98-1.14 1.24-1.53.26-.39.52-.32.88-.19.36.13 2.27 1.07 2.66 1.27.39.19.65.29.74.45.1.16.1.93-.22 1.83z"/>
-            </svg>
-          </div>
           <h4>Confirm via WhatsApp</h4>
         </div>
-        <a href="https://wa.me/8801521779357" target="_blank" rel="noopener noreferrer" class="info-pill">
-          <span class="info-pill-left">
-            <svg width="22" height="22" viewBox="0 0 32 32" fill="#25D366">
+        <a href="https://wa.me/8801521779357" target="_blank" rel="noopener noreferrer" class="info-pill info-pill-centered">
+          <span class="info-pill-left" style="gap: 10px;">
+            <svg width="24" height="24" viewBox="0 0 32 32" fill="#25D366">
               <path d="M16 3C8.82 3 3 8.82 3 16c0 2.31.61 4.56 1.76 6.54L3 29l6.65-1.74A12.93 12.93 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm7.58 18.36c-.32.9-1.86 1.72-2.57 1.83-.66.1-1.5.14-2.42-.15-.56-.18-1.28-.42-2.2-.82-3.87-1.67-6.4-5.58-6.59-5.84-.19-.26-1.57-2.09-1.57-3.99 0-1.9.99-2.83 1.34-3.22.35-.39.77-.49 1.03-.49.26 0 .51.01.74.02.24.01.56-.09.88.67.32.77 1.09 2.66 1.19 2.85.1.19.16.42.03.68-.13.26-.19.42-.39.64-.19.22-.41.5-.58.67-.19.19-.4.4-.17.79.23.39 1.01 1.67 2.17 2.7 1.49 1.33 2.75 1.74 3.14 1.94.39.19.62.16.85-.1.23-.26.98-1.14 1.24-1.53.26-.39.52-.32.88-.19.36.13 2.27 1.07 2.66 1.27.39.19.65.29.74.45.1.16.1.93-.22 1.83z"/>
             </svg>
-            <span>01521779357</span>
+            <span style="font-size: 16px;">01521779357</span>
           </span>
-          <span class="pill-chevron">&#8250;</span>
+          <span class="pill-arrow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </span>
         </a>
       </div>
 
@@ -433,6 +438,8 @@
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbzGqceR7xEromxTcL-A-DZFdbokL9sjWYuWtMv4xZzpmVfHOUyvLipNiz4YIhucE6jc/exec';
     const MAX_FILES = 5;
+    const MAX_SINGLE_FILE_MB = 30;
+    const MERGE_LIMIT_MB = 25;
 
     const CONFIG = {
       pricing: {
@@ -444,8 +451,9 @@
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
     let selectedFiles = [];   // Array of File objects (max 5)
-    let analyzedFiles = [];   // Array of { file, fileName, numPages, pagesAnalysis }
-    let mergedJobMeta = null; // Aggregated metadata for the merged PDF upload
+    let analyzedFiles = [];   // Array of { file, fileName, numPages, pagesAnalysis, pageDetails, totalAmount }
+    let mergedJobMeta = null; // Aggregated metadata
+    let shouldMergeUpload = false;
 
     function generateSubId() {
       return (window.crypto && crypto.randomUUID)
@@ -516,16 +524,18 @@
       selectedFiles = [];
       analyzedFiles = [];
       mergedJobMeta = null;
+      shouldMergeUpload = false;
     }
 
     function renderSelectedFilesList() {
       const list = document.getElementById('selectedFilesList');
       list.innerHTML = '';
       selectedFiles.forEach((file, idx) => {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
         const item = document.createElement('div');
         item.className = 'file-item';
         item.innerHTML = `
-          <span class="file-item-name" title="${file.name}">${idx + 1}. ${file.name}</span>
+          <span class="file-item-name" title="${file.name}">${idx + 1}. ${file.name} <span style="color:#64748b; font-weight:400;">(${sizeMB} MB)</span></span>
           <button type="button" class="file-remove-btn" onclick="removeFile(${idx})" title="Remove file">&times;</button>
         `;
         list.appendChild(item);
@@ -554,7 +564,7 @@
     function handleFileChange() {
       const fileInput = document.getElementById('pdfInput');
       const incoming = Array.from(fileInput.files || []);
-      fileInput.value = ''; // Allow re-selecting or adding more files
+      fileInput.value = '';
 
       if (incoming.length === 0) return;
 
@@ -563,8 +573,8 @@
           showToast(`Invalid file: ${f.name} (PDF only)`, true);
           return;
         }
-        if (f.size > 100 * 1024 * 1024) {
-          showToast(`${f.name} is too large (Max 100MB)`, true);
+        if (f.size > MAX_SINGLE_FILE_MB * 1024 * 1024) {
+          showToast(`${f.name} exceeds ${MAX_SINGLE_FILE_MB}MB limit`, true);
           return;
         }
       }
@@ -612,6 +622,15 @@
       });
     }
 
+    function readFileAsBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
     function recalculateEstimate(mode) {
       let totalCost = 0;
       let totalPagesCount = 0;
@@ -624,6 +643,8 @@
 
       analyzedFiles.forEach((item, idx) => {
         let fileCost = 0;
+        const singleFilePageDetails = [];
+
         const groupDiv = document.createElement('div');
         groupDiv.className = 'file-group';
 
@@ -638,11 +659,8 @@
           if (p.intensity === 'Blank') totalBlank++;
           else totalPrintable++;
 
-          flatPageDetails.push({
-            page: totalPagesCount,
-            intensity: p.intensity,
-            cost: cost
-          });
+          singleFilePageDetails.push({ page: p.page, intensity: p.intensity, cost: cost });
+          flatPageDetails.push({ page: totalPagesCount, intensity: p.intensity, cost: cost });
 
           const isBlank = p.intensity === 'Blank';
           const badgeColor = isBlank ? '#059669' : '#64748b';
@@ -656,11 +674,14 @@
           gridDiv.appendChild(thumbDiv);
         });
 
+        item.pageDetails = singleFilePageDetails;
+        item.totalAmount = Math.round(fileCost);
+
         const headerDiv = document.createElement('div');
         headerDiv.className = 'file-group-header';
         headerDiv.innerHTML = `
           <span class="file-group-name" title="${item.fileName}">${idx + 1}. ${item.fileName}</span>
-          <span style="white-space:nowrap; color:var(--primary);">${Math.round(fileCost)} Tk</span>
+          <span style="white-space:nowrap; color:var(--primary);">${item.totalAmount} Tk</span>
         `;
 
         groupDiv.appendChild(headerDiv);
@@ -747,7 +768,9 @@
             file: file,
             fileName: file.name,
             numPages: numPages,
-            pagesAnalysis: pagesAnalysis
+            pagesAnalysis: pagesAnalysis,
+            pageDetails: [],
+            totalAmount: 0
           });
         }
 
@@ -791,18 +814,44 @@
       const roll = document.getElementById('rollInput').value;
       if (!/^\d{7}$/.test(roll)) return showToast('Please enter a 7-digit roll number', true);
 
+      const totalBytes = analyzedFiles.reduce((sum, item) => sum + item.file.size, 0);
+      shouldMergeUpload = analyzedFiles.length > 1 && totalBytes <= MERGE_LIMIT_MB * 1024 * 1024;
+
       mergedJobMeta.roll = roll;
       mergedJobMeta.fileName = analyzedFiles.length === 1
         ? analyzedFiles[0].fileName
         : `Merged_${roll}_${analyzedFiles.length}files.pdf`;
 
-      document.getElementById('submitBtn').disabled = true;
-      document.getElementById('confirmFileCount').innerText =
-        analyzedFiles.length > 1
+      let infoText = `1 PDF file (${mergedJobMeta.totalPages} pages)`;
+      if (analyzedFiles.length > 1) {
+        infoText = shouldMergeUpload
           ? `${analyzedFiles.length} PDFs will be merged into 1 file (${mergedJobMeta.totalPages} pages)`
-          : `1 PDF file (${mergedJobMeta.totalPages} pages)`;
+          : `${analyzedFiles.length} large PDFs will upload separately (${mergedJobMeta.totalPages} pages)`;
+      }
+
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('confirmFileCount').innerText = infoText;
       document.getElementById('confirmTotal').innerText = mergedJobMeta.totalAmount;
       openModal('confirmModal');
+    }
+
+    async function uploadSingleBase64(base64, jobMeta, progressCallback) {
+      const CHUNK_SIZE = 1024 * 1024 * 3;
+      const totalChunks = Math.ceil(base64.length / CHUNK_SIZE);
+      for (let i = 0; i < totalChunks; i++) {
+        const chunk = base64.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+        await apiRequest({
+          action: 'uploadChunk',
+          subId: jobMeta.subId,
+          chunkIndex: i,
+          chunkBase64: chunk
+        });
+        progressCallback((i + 1) / totalChunks);
+      }
+      await apiRequest({
+        action: 'submitPrintJob',
+        ...jobMeta
+      });
     }
 
     async function executeUpload() {
@@ -812,45 +861,68 @@
       const fill = document.getElementById('uploadFill');
       textElement.style.color = 'var(--primary)';
 
-      const CHUNK_SIZE = 1024 * 1024 * 3;
-
       try {
-        textElement.innerText = analyzedFiles.length > 1 ? 'Merging PDFs...' : 'Preparing PDF...';
-        fill.style.width = '10%';
+        let uploadAsMerged = shouldMergeUpload;
+        let mergedBase64 = null;
 
-        const mergedBase64 = await mergeSelectedPDFsToBase64();
-        const totalChunks = Math.ceil(mergedBase64.length / CHUNK_SIZE);
-
-        for (let i = 0; i < totalChunks; i++) {
-          const chunk = mergedBase64.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-          await apiRequest({
-            action: 'uploadChunk',
-            subId: mergedJobMeta.subId,
-            chunkIndex: i,
-            chunkBase64: chunk
-          });
-
-          const percent = 10 + Math.round(((i + 1) / totalChunks) * 80);
-          fill.style.width = percent + '%';
-          textElement.innerText = `Uploading...: ${percent}%`;
+        if (uploadAsMerged) {
+          textElement.innerText = 'Merging PDFs...';
+          fill.style.width = '10%';
+          try {
+            mergedBase64 = await mergeSelectedPDFsToBase64();
+          } catch (mergeErr) {
+            console.warn('Merge failed, falling back to separate uploads:', mergeErr);
+            uploadAsMerged = false;
+            textElement.innerText = 'Switching to separate upload...';
+          }
         }
 
-        textElement.innerText = 'Finalizing order...';
-        await apiRequest({
-          action: 'submitPrintJob',
-          ...mergedJobMeta
-        });
+        if (uploadAsMerged && mergedBase64) {
+          await uploadSingleBase64(mergedBase64, mergedJobMeta, (ratio) => {
+            const percent = 10 + Math.round(ratio * 85);
+            fill.style.width = percent + '%';
+            textElement.innerText = `Uploading...: ${percent}%`;
+          });
+        } else {
+          const totalFiles = analyzedFiles.length;
+          for (let fIdx = 0; fIdx < totalFiles; fIdx++) {
+            const item = analyzedFiles[fIdx];
+            textElement.innerText = totalFiles > 1
+              ? `Preparing file ${fIdx + 1} of ${totalFiles}...`
+              : 'Preparing PDF...';
+
+            const base64 = await readFileAsBase64(item.file);
+            const singleJobMeta = {
+              subId: generateSubId(),
+              roll: mergedJobMeta.roll,
+              fileName: item.fileName,
+              mode: mergedJobMeta.mode,
+              totalPages: item.numPages,
+              pageDetails: item.pageDetails,
+              totalAmount: item.totalAmount
+            };
+
+            await uploadSingleBase64(base64, singleJobMeta, (ratio) => {
+              const overall = Math.round(((fIdx + ratio * 0.9) / totalFiles) * 100);
+              fill.style.width = overall + '%';
+              textElement.innerText = totalFiles > 1
+                ? `Uploading file ${fIdx + 1}/${totalFiles}: ${overall}%`
+                : `Uploading...: ${overall}%`;
+            });
+          }
+        }
 
         fill.style.width = '100%';
         const finalAmount = mergedJobMeta.totalAmount;
         const finalPages = mergedJobMeta.totalPages;
         const finalRoll = mergedJobMeta.roll;
 
-        // Close upload/print modals and open persistent confirmation modal
         document.getElementById('confirmModal').classList.remove('active');
         document.getElementById('printModal').classList.remove('active');
+
+        document.getElementById('successTotalAmount').innerText = finalAmount;
         document.getElementById('successSummaryText').innerHTML =
-          `Roll <strong>${finalRoll}</strong> &bull; <strong>${finalPages}</strong> Pages &bull; Total: <strong style="color:var(--primary)">${finalAmount} Tk</strong>`;
+          `Roll <strong>${finalRoll}</strong> &bull; <strong>${finalPages}</strong> Pages`;
         openModal('successUploadModal');
 
       } catch (err) {
